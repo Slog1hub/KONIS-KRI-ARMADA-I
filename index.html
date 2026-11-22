@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'">
+<meta name="theme-color" content="#0b2545">
+<meta name="description" content="Kalkulator persentase Kondisi Teknis (Konis) KRI sesuai Surat Edaran Aslog Kasal 2026. Berjalan offline, data hanya di perangkat.">
+<meta name="referrer" content="no-referrer">
+<title>KONIS KRI</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+:root{
+  --navy:#0b2545;--navy2:#13315c;--bg:#eef1f6;--card:#fff;--line:#d9e0ea;--text:#14213d;--muted:#5c677d;
+  --b:#1b7f4b;--b-bg:#e3f4ea;--rr:#b26a00;--rr-bg:#fff1d6;--rb:#c0392b;--rb-bg:#fde5e2;--acc:#1f5fbf;--acc-bg:#e6eefb;
+  --r:12px;--safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",sans-serif;font-size:16px;line-height:1.45;color:var(--text);background:var(--bg);min-height:100vh}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--acc)}
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:6px;background:var(--navy);color:#fff;padding:calc(env(safe-area-inset-top,0px) + 8px) 8px 8px;min-height:56px;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+.top h1{flex:1;font-size:18px;margin:0;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top h1 small{display:block;font-size:12px;font-weight:400;opacity:.8}
+.ib{background:transparent;border:0;color:#fff;min-width:44px;height:44px;border-radius:10px;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.ib:active{background:rgba(255,255,255,.15)}
+main{max-width:720px;margin:0 auto;padding:12px 12px calc(96px + var(--safe-b))}
+.card{background:var(--card);border-radius:var(--r);padding:14px;margin-bottom:12px;box-shadow:0 1px 2px rgba(20,33,61,.08)}
+.card h2{font-size:16px;margin:0 0 10px}
+.card h3{font-size:15px;margin:14px 0 8px}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.row{display:flex;gap:10px;align-items:center}
+.grow{flex:1;min-width:0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:46px;padding:0 16px;border-radius:10px;border:1px solid var(--line);background:#fff;font-weight:600;cursor:pointer;text-decoration:none;color:var(--text)}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+.btn.dan{color:var(--rb);border-color:#f0c4be}
+.btn.block{display:flex;width:100%}
+.btn:active{filter:brightness(.92)}
+.btn[disabled]{opacity:.5}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btns .btn{flex:1}
+label.f{display:block;margin-bottom:12px}
+label.f>span{display:block;font-size:13px;color:var(--muted);margin-bottom:4px;font-weight:600}
+input.t,select.t,textarea.t{width:100%;min-height:46px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff;font-size:16px}
+textarea.t{min-height:80px}
+input.t:focus,select.t:focus,textarea.t:focus{outline:2px solid var(--acc);border-color:var(--acc)}
+.pill{display:inline-block;white-space:nowrap;padding:3px 10px;border-radius:999px;font-size:13px;font-weight:700}
+.pill.b{background:var(--b-bg);color:var(--b)}.pill.rr{background:var(--rr-bg);color:var(--rr)}.pill.rb{background:var(--rb-bg);color:var(--rb)}.pill.na{background:#e8ebf0;color:var(--muted)}
+.c-b{color:var(--b)}.c-rr{color:var(--rr)}.c-rb{color:var(--rb)}
+.chip{display:inline-block;font-size:12px;padding:2px 8px;border-radius:6px;background:var(--acc-bg);color:var(--acc);font-weight:600}
+/* home */
+.ship{display:flex;gap:12px;align-items:center;text-decoration:none;color:inherit}
+.ship .big{font-size:26px;font-weight:750;text-align:right;line-height:1.1}
+.empty{text-align:center;padding:36px 16px}
+.empty .ico{font-size:52px}
+.fab{position:fixed;right:16px;bottom:calc(16px + var(--safe-b));z-index:15;border-radius:999px;min-height:56px;padding:0 22px;box-shadow:0 4px 14px rgba(31,95,191,.4)}
+/* summary */
+.sum{display:flex;gap:14px;align-items:center}
+.gauge{width:118px;height:118px;flex:none}
+.g-bg{fill:none;stroke:#e6eaf1;stroke-width:12}
+.g-fg{fill:none;stroke:#9aa5b8;stroke-width:12;stroke-linecap:round;transition:stroke-dasharray .4s}
+.g-fg.b{stroke:var(--b)}.g-fg.rr{stroke:#e39a17}.g-fg.rb{stroke:var(--rb)}
+.g-v{font-size:28px;font-weight:750;text-anchor:middle;fill:var(--text)}
+.g-u{font-size:13px;text-anchor:middle;fill:var(--muted)}
+.kv{display:flex;justify-content:space-between;gap:8px;padding:4px 0;font-size:14px}
+.kv b{font-weight:700}
+.bar{height:6px;background:#e6eaf1;border-radius:6px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:#9aa5b8;border-radius:6px}
+.bar i.b{background:var(--b)}.bar i.rr{background:#e39a17}.bar i.rb{background:var(--rb)}
+.warn{background:var(--rb-bg);color:#7d1f15;border-radius:10px;padding:10px 12px;font-size:14px;margin-top:10px}
+.info{background:var(--acc-bg);color:#123a73;border-radius:10px;padding:10px 12px;font-size:14px}
+.note{background:#fff7e0;color:#6b4a00;border-radius:10px;padding:10px 12px;font-size:14px}
+.seg{display:flex;background:#dde3ec;border-radius:12px;padding:4px;margin-bottom:12px;position:sticky;top:64px;z-index:10}
+.seg button{flex:1;border:0;background:transparent;min-height:42px;border-radius:9px;font-weight:650;color:var(--muted);cursor:pointer}
+.seg button.on{background:#fff;color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.sys{background:#fff;border-radius:var(--r);margin-bottom:10px;box-shadow:0 1px 2px rgba(20,33,61,.08);overflow:hidden}
+.sys-h{display:flex;width:100%;align-items:center;gap:10px;padding:12px 14px 4px;border:0;background:transparent;text-align:left;cursor:pointer}
+.sys-h .t{flex:1;min-width:0;font-weight:650}
+.sys-h .t small{display:block;font-weight:400;color:var(--muted);font-size:13px}
+.sys-h .v{font-weight:750;font-size:18px;white-space:nowrap}
+.sys .bar{margin:6px 14px 12px}
+.units{border-top:1px solid var(--line)}
+.unit-row{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid #eef1f6;text-decoration:none;color:inherit;min-height:48px}
+.unit-row .n{flex:1}
+.unit-row .chev{color:#9aa5b8}
+.add-unit{display:block;width:100%;border:0;background:#f7f9fc;color:var(--acc);font-weight:650;min-height:46px;cursor:pointer}
+.star{color:#d4a106}
+/* unit editor */
+.ubar{position:sticky;top:64px;z-index:10;display:flex;justify-content:space-between;align-items:center;background:#fff;border-radius:var(--r);padding:10px 14px;margin-bottom:12px;box-shadow:0 2px 6px rgba(20,33,61,.12);border-left:6px solid #9aa5b8}
+.ubar.b{border-left-color:var(--b)}.ubar.rr{border-left-color:#e39a17}.ubar.rb{border-left-color:var(--rb)}
+.ubar b{font-size:22px}
+.prm{background:#fff;border-radius:var(--r);padding:12px 14px;margin-bottom:10px;box-shadow:0 1px 2px rgba(20,33,61,.08)}
+.prm-h{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px}
+.prm-h .t{flex:1;font-weight:650}
+.prm-h .t small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.mini{border:1px solid var(--line);background:#fff;border-radius:8px;min-width:40px;height:36px;cursor:pointer;color:var(--muted)}
+.pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:end}
+.inp>span{display:block;font-size:12px;color:var(--muted);margin-bottom:3px;min-height:16px}
+.inw{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;background:#fff;overflow:hidden}
+.inw:focus-within{outline:2px solid var(--acc);border-color:var(--acc)}
+.inw input{flex:1;min-width:0;border:0;min-height:46px;padding:8px 10px;font-size:17px;background:transparent;outline:0}
+.inw .u{padding:0 8px;color:var(--muted);font-size:13px;white-space:nowrap}
+.inw .pm{border:0;border-left:1px solid var(--line);background:#f4f6fa;min-height:46px;min-width:40px;cursor:pointer;font-weight:700}
+.res{margin-top:8px;font-size:14px;color:var(--muted)}
+.res b{color:var(--text);font-size:16px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;cursor:pointer}
+.opt input{width:20px;height:20px;margin:2px 0 0;flex:none;accent-color:var(--acc)}
+.opt b{min-width:44px;display:inline-block}
+.opt:has(input:checked){border-color:var(--acc);background:var(--acc-bg)}
+.quick{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.quick button{flex:1;min-height:40px;border:1px solid var(--line);border-radius:8px;background:#fff;font-weight:650;cursor:pointer}
+.sub{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)}
+.sub .sl{grid-column:1/-1;font-size:13px;font-weight:650}
+details.hint{background:var(--acc-bg);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:14px;color:#123a73}
+details.hint summary{font-weight:650;cursor:pointer}
+/* checklist */
+.chk{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #eef1f6}
+.chk input[type=checkbox]{width:22px;height:22px;flex:none;accent-color:var(--acc)}
+.chk .n{flex:1}
+.step{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.step button{width:38px;height:38px;border:0;background:#f4f6fa;font-size:20px;cursor:pointer}
+.step span{min-width:30px;text-align:center;font-weight:700}
+.jenis{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+.jenis label{border:2px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;display:block}
+.jenis label:has(input:checked){border-color:var(--acc);background:var(--acc-bg)}
+.jenis input{position:absolute;opacity:0;pointer-events:none}
+.jenis b{display:block}
+.catT{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin:16px 0 2px}
+/* report */
+.rep table{width:100%;border-collapse:collapse;font-size:13px}
+.rep th,.rep td{border:1px solid #c9d1dd;padding:5px 6px;vertical-align:top}
+.rep th{background:#eef1f6;text-align:left}
+.rep td.n{text-align:right;white-space:nowrap}
+.rep tr.sy td{background:#f7f9fc;font-weight:650}
+.rep tr.grp td{background:#e6eefb;font-weight:750}
+.rep .kop{text-align:center;margin-bottom:10px}
+.rep .kop b{display:block;font-size:15px}
+.ttd{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin-top:20px;font-size:13px;text-align:center}
+.ttd .sp{height:56px}
+.tscroll{overflow-x:auto}
+.sw{display:flex;align-items:center;gap:10px;padding:8px 0}
+.sw input{width:22px;height:22px;accent-color:var(--rb)}
+/* modal / toast / lock */
+#modal{position:fixed;inset:0;background:rgba(11,37,69,.45);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+#modal[hidden]{display:none}
+.sheet{background:#fff;width:100%;max-width:560px;border-radius:16px 16px 0 0;padding:18px 16px calc(18px + var(--safe-b));max-height:90vh;overflow:auto}
+.sheet h2{margin:0 0 12px;font-size:18px}
+#toast{position:fixed;left:50%;bottom:calc(90px + var(--safe-b));transform:translateX(-50%) translateY(20px);background:#14213d;color:#fff;padding:10px 16px;border-radius:10px;opacity:0;pointer-events:none;transition:.25s;z-index:60;max-width:90vw;text-align:center;font-size:14px}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.lock{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--navy);color:#fff;padding:24px;text-align:center}
+.lock input{max-width:240px;text-align:center;font-size:26px;letter-spacing:.3em}
+.bottom{position:fixed;left:0;right:0;bottom:0;z-index:15;background:#fff;border-top:1px solid var(--line);padding:8px 12px calc(8px + var(--safe-b))}
+.bottom .btns{max-width:720px;margin:0 auto}
+.trend{width:100%;height:140px}
+.print-only{display:none}
+@media (min-width:600px){.pair{gap:12px}}
+@media print{
+  body{background:#fff}
+  .top,.noprint,.bottom,#toast,#modal,.fab{display:none!important}
+  main{padding:0;max-width:none}
+  .card{box-shadow:none;padding:0;margin:0 0 8px}
+  .print-only{display:block}
+  .rep table{font-size:10.5px}
+  .rep tr{page-break-inside:avoid}
+  @page{size:A4;margin:14mm 12mm}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div id="modal" hidden></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<noscript><p style="padding:20px">Aplikasi ini membutuhkan JavaScript.</p></noscript>
+<script>
+'use strict';
+/* =====================================================================
+   KONIS KRI — Kalkulator Persentase Kondisi Teknis KRI
+   Dasar: Surat Edaran Aslog Kasal (Juni 2026) tentang Tata Cara
+   Pemberian Nilai Persentase Kondisi Teknis KRI beserta lampirannya.
+   Semua data disimpan HANYA di perangkat (localStorage). Tidak ada
+   koneksi jaringan keluar.
+   ===================================================================== */
+const APP_VER = '1.0.0';
+const KEY = 'konis_kri_v1';
+const LOCK_AFTER_MS = 5 * 60 * 1000;
+
+/* ---------- utilitas ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const clone = o => JSON.parse(JSON.stringify(o));
+const pad = n => String(n).padStart(2, '0');
+const today = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
+const thisMonth = () => today().slice(0, 7);
+function num(x){ if (x === '' || x == null) return null; const v = parseFloat(String(x).trim().replace(/\s/g,'').replace(',', '.')); return Number.isFinite(v) ? v : null; }
+const clamp = v => Math.max(0, Math.min(100, v));
+function fmt(v, d = 2){ if (v == null || !Number.isFinite(v)) return '–'; return v.toLocaleString('id-ID', {minimumFractionDigits: d, maximumFractionDigits: d}); }
+const pct = (v, d = 2) => v == null ? '–' : fmt(v, d) + '%';
+const fnum = x => { const v = num(x); return v == null ? '?' : v.toLocaleString('id-ID', {maximumFractionDigits: 4}); };
+const BULAN = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+const fPeriode = p => { if (!p) return '–'; const [y, m] = p.split('-'); return `${BULAN[+m-1] || ''} ${y}`; };
+const fTgl = t => { if (!t) return '–'; const [y, m, d] = t.split('-'); return `${+d} ${BULAN[+m-1]} ${y}`; };
+
+/* ---------- status (SE butir 2–3 & tabel Penentuan Nilai Konis Total) ---------- */
+const ST = {
+  B:  {k:'B',  nama:'Baik',         siap:'Siap Tempur',  laik:'Laik Tempur',  cls:'b'},
+  RR: {k:'RR', nama:'Rusak Ringan', siap:'Siap Operasi', laik:'Laik Operasi', cls:'rr'},
+  RB: {k:'RB', nama:'Rusak Berat',  siap:'Tidak Siap',   laik:'Tidak Laik',   cls:'rb'}
+};
+function status(v){ if (v == null) return null; const r = Math.round(v * 100) / 100; return r >= 86 ? ST.B : r >= 60 ? ST.RR : ST.RB; }
+const cls = v => { const s = status(v); return s ? s.cls : ''; };
+
+/* ---------- skala kualitatif dari lampiran SE ---------- */
+const SK = {
+  display:[[100,'Semua tampilan layar jelas dan berfungsi'],[75,'Tampilan kurang jelas tapi masih bisa digunakan'],[50,'Banyak elemen sulit dilihat, tapi masih bisa digunakan'],[25,'Display menyala, tapi tidak dapat digunakan'],[0,'Display mati total']],
+  panel:[[100,'Semua tombol panel berfungsi dengan baik'],[75,'Semua tombol berfungsi, tetapi ada beberapa yang kurang responsif'],[50,'Banyak tombol tidak berfungsi'],[25,'Mayoritas tombol tidak berfungsi']],
+  meridian:[[100,'Waktu stabil 4 jam'],[75,'Waktu stabil 4,5 jam'],[50,'Waktu stabil 5 jam'],[25,'Waktu stabil 5,5 jam'],[0,'Waktu stabil lebih dari 6 jam']],
+  elevasi:[[100,'Rentang sudut sesuai spesifikasi'],[75,'Rentang mendekati spesifikasi, tetapi ada sedikit deviasi'],[50,'Rentang lebih kecil dari spesifikasi, tetapi masih mencakup kebutuhan operasional'],[25,'Rentang tidak sesuai dengan spesifikasi']],
+  prefiring:[[100,'Semua dapat bekerja dengan baik tanpa ada macet'],[75,'Ada hambatan kecil tetapi masih bisa digunakan'],[50,'Fungsi terganggu, memerlukan perbaikan'],[25,'Hampir tidak berfungsi, memerlukan perbaikan besar']],
+  dome:[[100,'Tidak ada kerusakan fisik atau kegagalan array'],[75,'Salah satu array tidak aktif'],[50,'Banyak array yang tidak aktif'],[25,'Ada kebocoran pada dome dan banyak kerusakan pada array']],
+  lacak:[[100,'Pelacakan konsisten, tidak pernah kehilangan kontak'],[75,'Pelacakan cukup baik tetapi ada gangguan kecil'],[50,'Pelacakan sering kehilangan target'],[25,'Pelacakan tidak stabil dan sering gagal']],
+  sinyal:[[100,'Sinyal selalu stabil dan kuat'],[75,'Sinyal stabil dengan sedikit gangguan'],[50,'Sinyal sering terputus atau mengalami gangguan'],[25,'Sinyal lemah dan tidak stabil']],
+  server:[[100,'Server bekerja optimal tanpa overheating'],[75,'Server bekerja dengan sedikit peningkatan suhu atau load tinggi'],[50,'Server mengalami peningkatan suhu yang signifikan'],[25,'Server tidak mampu bekerja sama sekali']]
+};
+
+/* ---------- jenis parameter ---------- */
+const TIPE = {
+  naik:'Perbandingan — makin besar makin baik (saat ini ÷ standar)',
+  turun:'Perbandingan — makin kecil makin baik (standar ÷ saat ini)',
+  suhu:'Suhu — tercapai ≤ seharusnya = 100%',
+  deviasi:'Keakuratan — (1 − deviasi ÷ referensi)',
+  toleransi:'Deviasi terhadap toleransi — (1 − deviasi ÷ toleransi)',
+  efektivitas:'Efektivitas jamming — (1 − jarak sesudah ÷ sebelum)',
+  skala:'Pilihan kondisi (skala SE)',
+  persen:'Penilaian fungsi langsung (%)',
+  kadaluwarsa:'Masa kadaluwarsa sertifikat',
+  gabungan:'Gabungan beberapa tekanan (dirata-rata)'
+};
+const LBL = {
+  naik:['Standar (baru)','Saat ini'], turun:['Standar (baru)','Saat ini'], suhu:['Seharusnya','Saat ini'],
+  deviasi:['Nilai referensi','Nilai terukur'], toleransi:['Toleransi maksimum','Deviasi'],
+  efektivitas:['Jarak deteksi sebelum ECM','Jarak deteksi setelah ECM']
+};
+const NEG_OK = {suhu:1, deviasi:1};
+
+/* ---------- template pesawat sesuai lampiran SE ---------- */
+const P = (l, t, o = {}) => Object.assign({l, t}, o);
+const STAB = () => P('Stabilitas operasional', 'naik', {u:'jam', d:24, ls:'Standar', ln:'Operasi stabil'});
+const DISP = () => P('Display', 'skala', {sk:'display'});
+const PANEL = () => P('Control panel', 'skala', {sk:'panel'});
+const UPD = (l = 'Kecepatan pembaruan data') => P(l, 'turun', {u:'detik'});
+const JML = (l, o = {}) => P(l, 'naik', Object.assign({u:'buah', ls:'Jumlah seharusnya', ln:'Jumlah siap (baik)'}, o));
+const ALK = (l, b) => P(l, 'naik', {u:'unit', b, ls:'Standardisasi jumlah', ln:'Jumlah siap'});
+const H_FUNGSI = 'Untuk pesawat yang tidak diatur khusus di SE (mis. Main Switch Board, sistem perkabelan, peralatan laundry): dinilai dari fungsinya. Berfungsi normal dan tidak pernah ada masalah/kerusakan = 100%.';
+const H_RASIO = 'Nilai tiap parameter = kondisi saat ini dibanding kondisi standar pabrik (saat baru), lalu dibuat rata-ratanya.';
+
+const TPL = [
+  // ===== PLATFORM =====
+  {k:'bakap', n:'Badan Kapal (Bakap)', g:'P', c:'Bakap & Penggerak', vital:1, unit:'Badan Kapal', multi:0,
+   params:[P('Plat atas garis air','naik',{u:'mm',ls:'Tebal standar',ln:'Rata-rata UT docking terakhir'}), P('Plat bawah garis air','naik',{u:'mm',ls:'Tebal standar',ln:'Rata-rata UT docking terakhir'})],
+   addP:{l:'Plat bawah garis air',t:'naik',u:'mm',ls:'Tebal standar',ln:'Rata-rata UT docking terakhir'},
+   h:'Rata-rata hasil UT ketebalan plat lambung saat docking terakhir ÷ ketebalan plat standar × 100%. Buat satu baris untuk setiap ketebalan standar (mis. 10 mm, 14 mm, 16 mm, 20 mm). Konis Bakap = rata-rata semua baris.'},
+  {k:'mpk', n:'Mesin Pendorong Kapal (MPK/PEM)', g:'P', c:'Bakap & Penggerak', vital:1, unit:'MPK', multi:1, q:2,
+   params:[P('RPM maksimal','naik',{u:'RPM'})],
+   h:'RPM maksimal yang mampu dicapai saat ini ÷ RPM maksimal standar pabrik × 100%. Untuk Propulsion Electric Motor (PEM) gunakan daya (kW): ubah nama unit dan satuan.'},
+  {k:'gearbox', n:'Gearbox', g:'P', c:'Bakap & Penggerak', unit:'Gearbox', multi:1, q:2,
+   params:[P('Temperatur bantalan depan','turun',{u:'°C'}), P('Temperatur bantalan belakang','turun',{u:'°C'}), P('Tekanan oli','naik',{u:'bar'})],
+   h:'Bandingkan parameter gearbox (tekanan oli, temperatur bantalan, dll.) kondisi saat ini dengan seharusnya, lalu dirata-rata. Parameter lain boleh ditambahkan.'},
+  {k:'dg', n:'Diesel Generator (DG)', g:'P', c:'Kelistrikan & Bantu', unit:'DG', multi:1, q:2,
+   params:[P('Daya/beban maksimal','naik',{u:'kW'})],
+   h:'Daya/beban maksimal yang mampu dihasilkan DG saat ini ÷ daya maksimal saat baru (standar pabrik) × 100%.'},
+  {k:'pompa', n:'Pompa', g:'P', c:'Kelistrikan & Bantu', unit:'Pompa', multi:1, q:2,
+   params:[P('Tekanan maksimal','naik',{u:'bar'})],
+   h:'Tekanan maksimal pompa saat ini ÷ tekanan maksimal saat baru × 100%. Ganti nama unit, mis. "Pompa Air Tawar 1", "Pompa Bahan Bakar 2".'},
+  {k:'kompresor', n:'Kompresor Udara', g:'P', c:'Kelistrikan & Bantu', unit:'Kompresor', multi:1, q:1,
+   params:[P('Tekanan udara maksimal','naik',{u:'bar'})],
+   h:'Tekanan udara maksimal saat ini ÷ tekanan udara maksimal saat baru × 100%. Contoh unit: KTT 1, KTR 2.'},
+  {k:'separator', n:'Separator BB/Oli', g:'P', c:'Kelistrikan & Bantu', unit:'Separator', multi:1, q:1,
+   params:[P('Volume maksimal kerja','naik',{u:'m³/jam'})],
+   h:'Volume maksimal BB/oli yang mampu dibersihkan saat ini ÷ volume maksimal saat baru (dalam jangka waktu yang sama) × 100%.'},
+  {k:'ro', n:'Reverse Osmosis/Verdamper', g:'P', c:'Kelistrikan & Bantu', unit:'RO', multi:1, q:1,
+   params:[P('Produksi air tawar maksimal','naik',{u:'ton/hari'})],
+   h:'Volume maksimal air tawar yang dihasilkan saat ini ÷ volume maksimal saat baru (dalam jangka waktu yang sama) × 100%.'},
+  {k:'fan', n:'Blower/Fan', g:'P', c:'Kelistrikan & Bantu', unit:'Fan', multi:1, q:2,
+   params:[P('Ampere motor saat dibebani','turun',{u:'A'})],
+   h:'Ampere standar ÷ ampere saat ini × 100%. Jika ampere saat ini di bawah standar atau masih dalam rentang standar, nilainya 100%.'},
+  {k:'fr', n:'Fresh Room (FR)', g:'P', c:'Kelistrikan & Bantu', unit:'FR', multi:1, q:1,
+   params:[P('Temperatur ruangan (berbeban)','suhu',{u:'°C'})],
+   h:'Bandingkan temperatur ruangan saat ada beban/bahan basah dengan temperatur seharusnya. Jika yang dicapai sama atau lebih dingin, nilainya 100%. Contoh: seharusnya −20 °C, tercapai −18 °C → 18 ÷ 20 × 100% = 90%. Gunakan tombol ± untuk nilai minus.'},
+  {k:'ac', n:'AC/AHU/CWU', g:'P', c:'Kelistrikan & Bantu', unit:'AC', multi:1, q:1,
+   params:[P('Temperatur yang dicapai','suhu',{u:'°C'})],
+   h:'Temperatur seharusnya ÷ temperatur ruangan (beban siang hari) saat ini × 100%. Jika yang dicapai sama atau lebih dingin, nilainya 100%. Untuk AHU/CWU dapat memakai temperatur unit.'},
+  {k:'lier', n:'Motor Lier', g:'P', c:'Geladak & Keselamatan', unit:'Lier', multi:1, q:2,
+   params:[P('Ampere motor saat dibebani','turun',{u:'A'})],
+   h:'Ampere standar ÷ ampere saat ini (saat dibebani) × 100%. Jika ampere saat ini di bawah standar atau masih dalam rentang standar, nilainya 100%. Contoh unit: Lier Jangkar, Lier Tross.'},
+  {k:'crane', n:'Crane', g:'P', c:'Geladak & Keselamatan', unit:'Crane', multi:1, q:1,
+   params:[P('Kemampuan angkat maksimal','naik',{u:'kg'})],
+   h:'Kemampuan angkat maksimal saat ini ÷ kemampuan angkat maksimal saat baru × 100%.'},
+  {k:'rantai', n:'Rantai Jangkar', g:'P', c:'Geladak & Keselamatan', unit:'Rantai Jangkar', multi:1, q:2,
+   params:[P('Diameter rantai','naik',{u:'mm',ls:'Diameter standar',ln:'Rata-rata ukur docking terakhir'})],
+   h:'Rata-rata hasil ukur diameter rantai saat docking terakhir ÷ diameter standar × 100%.'},
+  {k:'jangkar', n:'Jangkar', g:'P', c:'Geladak & Keselamatan', unit:'Jangkar', multi:1, q:2,
+   params:[P('Ukuran hasil ukur','naik',{u:'mm',ls:'Ukuran standar',ln:'Rata-rata ukur docking terakhir'})],
+   h:'SE butir 14 memakai cara yang sama dengan rantai jangkar: rata-rata hasil ukur saat docking terakhir ÷ ukuran standar × 100%.'},
+  {k:'fin', n:'Fin Stabilizer', g:'P', c:'Geladak & Keselamatan', unit:'Fin Stabilizer', multi:1, q:1,
+   params:[P('Ampere motor pompa','turun',{u:'A'}), P('Tekanan oli','naik',{u:'bar'})],
+   h:'Bandingkan parameter (tekanan oli, ampere motor, dll.) saat ini dengan seharusnya, lalu dirata-rata.'},
+  {k:'kemudi', n:'Kemudi', g:'P', c:'Geladak & Keselamatan', unit:'Kemudi', multi:1, q:1,
+   params:[P('Ampere motor pompa','turun',{u:'A'}), P('Tekanan oli','naik',{u:'bar'})],
+   h:'Bandingkan parameter (tekanan oli, ampere motor, dll.) saat ini dengan seharusnya, lalu dirata-rata. Contoh unit: Kemudi Kanan, Kemudi Kiri.'},
+  {k:'pmk', n:'Pemadam Kebakaran (PMK)', g:'P', c:'Geladak & Keselamatan', unit:'Peralatan PMK', multi:0,
+   params:[JML('Baju tahan api'), JML('Oxygen Breathing Apparatus'), JML('Nozzle'), JML('Selang air laut'), JML('Dongkrak'), JML('CO2 15 kg')],
+   addP:{l:'Material PMK lain',t:'naik',u:'buah',ls:'Jumlah seharusnya',ln:'Jumlah siap (baik)'},
+   h:'Jumlah material siap (kondisi baik) ÷ jumlah seharusnya × 100% untuk tiap material, lalu dirata-rata.'},
+  {k:'rhib', n:'Sekoci/RHIB', g:'P', c:'Geladak & Keselamatan', unit:'RHIB', multi:1, q:1,
+   params:[P('Kecepatan','naik',{u:'knot',ls:'Kecepatan seharusnya',ln:'Kecepatan saat ini'})],
+   h:'Kecepatan yang dapat ditempuh saat ini ÷ kecepatan seharusnya × 100% (dengan sistem pendorong, peralatan pendukung dan bakap beroperasi).'},
+  {k:'lr', n:'Life Raft (LR)', g:'P', c:'Geladak & Keselamatan', unit:'Life Raft', multi:1, q:2,
+   params:[P('Masa berlaku sertifikat','kadaluwarsa')],
+   h:'Masa berlaku sertifikat 2 tahun. Belum kadaluwarsa = 100%. Jika lewat: Konis = (1 − bulan lewat ÷ 12) × 100%; kelebihan hari dibulatkan menjadi 1 bulan. Lewat 12 bulan = 0%. Dihitung terhadap tanggal penilaian.'},
+  {k:'lain_p', n:'Peralatan Platform Lainnya', g:'P', c:'Lainnya', unit:'Peralatan', multi:1, q:1,
+   params:[P('Kondisi fungsi','persen')], h:H_FUNGSI},
+
+  // ===== SEWACO / KOMUNIKASI =====
+  {k:'radarnav', n:'Radar Navigasi', g:'S', c:'Navigasi', vital:1, unit:'Radar Navigasi', multi:1, q:1,
+   params:[P('Jangkauan deteksi','naik',{u:'NM'}), P('Tegangan operasional komponen','naik',{u:'V'}), STAB(), UPD(), DISP(), P('Keakuratan target','deviasi',{u:'km',ls:'Jarak referensi',ln:'Jarak terdeteksi radar'})],
+   h:H_RASIO + ' Parameter: jangkauan deteksi, tegangan, stabilitas, kecepatan pembaruan data, display dan keakuratan target.'},
+  {k:'gps', n:'GPS', g:'S', c:'Navigasi', vital:1, unit:'GPS', multi:1, q:1,
+   params:[P('Tegangan operasional komponen','naik',{u:'V'}), P('Antena GPS (penerimaan)','naik',{u:'dB-Hz'}), DISP()], h:H_RASIO},
+  {k:'gyro', n:'Gyro Kompas', g:'S', c:'Navigasi', vital:1, unit:'Gyro Kompas', multi:1, q:1,
+   params:[P('Keakuratan heading','deviasi',{u:'°',ls:'Heading referensi',ln:'Heading gyro'}), P('Kecepatan meridian','skala',{sk:'meridian'}), STAB()], h:H_RASIO},
+  {k:'echo', n:'Echosounder', g:'S', c:'Navigasi', unit:'Echosounder', multi:1, q:1,
+   params:[P('Keakuratan','deviasi',{u:'m',ls:'Kedalaman referensi',ln:'Kedalaman echosounder'}), DISP(), STAB(), P('Sensitivitas transduser','naik',{u:'m',ls:'Kedalaman referensi',ln:'Kedalaman minimum'}), P('Jangkauan operasional','naik',{u:'m'})], h:H_RASIO},
+  {k:'speedlog', n:'Speedlog', g:'S', c:'Navigasi', unit:'Speedlog', multi:1, q:1,
+   params:[P('Keakuratan','deviasi',{u:'knot',ls:'Kecepatan referensi',ln:'Kecepatan speedlog'}), DISP(), STAB(), P('Sensitivitas transduser','naik',{u:'knot',ls:'Kecepatan referensi',ln:'Kecepatan minimum'}), UPD('Kecepatan pengolahan data')], h:H_RASIO},
+  {k:'nddu', n:'NDDU', g:'S', c:'Navigasi', unit:'NDDU', multi:1, q:1,
+   params:[P('Keakuratan distribusi data','deviasi',{u:'knot',ls:'Data input',ln:'Data output NDDU'}), STAB(), UPD('Kecepatan pengolahan data'), P('Jumlah port aktif','naik',{u:'port'})], h:H_RASIO},
+  {k:'repeater', n:'Repeater Kompas', g:'S', c:'Navigasi', unit:'Repeater Kompas', multi:1, q:1,
+   params:[P('Keakuratan heading','deviasi',{u:'°',ls:'Data kompas master',ln:'Data repeater'}), STAB(), UPD()], h:H_RASIO},
+  {k:'ais', n:'AIS', g:'S', c:'Navigasi', unit:'AIS', multi:1, q:1,
+   params:[P('Keakuratan data posisi','deviasi',{u:'°',ls:'Posisi GPS (referensi)',ln:'Posisi AIS'}), STAB(), DISP()], h:H_RASIO},
+  {k:'clock', n:'Master Clock', g:'S', c:'Navigasi', unit:'Master Clock', multi:1, q:1,
+   params:[P('Keakuratan waktu','toleransi',{u:'detik',d:30}), STAB()],
+   h:'Keakuratan waktu = (1 − deviasi terhadap waktu referensi GPS ÷ toleransi maksimum) × 100%. Contoh SE: deviasi 10 detik, toleransi ±30 detik.'},
+  {k:'weather', n:'Weather System', g:'S', c:'Navigasi', unit:'Weather System', multi:1, q:1,
+   params:[P('Keakuratan pengukuran data','deviasi',{u:'m/s',ls:'Kecepatan angin referensi',ln:'Kecepatan angin sistem'}), STAB(), UPD()], h:H_RASIO},
+  {k:'navtex', n:'Navtex Receiver', g:'S', c:'Navigasi', unit:'Navtex', multi:1, q:1,
+   params:[P('Keakuratan penerimaan data','deviasi',{u:'dB',ls:'Sinyal referensi',ln:'Sinyal diterima'}), STAB(), UPD()], h:H_RASIO},
+  {k:'wcr', n:'Weather Chart Receiver', g:'S', c:'Navigasi', unit:'Weather Chart Receiver', multi:1, q:1,
+   params:[P('Keakuratan penerimaan data','deviasi',{u:'°C',ls:'Data referensi',ln:'Data diterima'}), STAB(), UPD()], h:H_RASIO},
+  {k:'radarsearch', n:'Radar Searching', g:'S', c:'Sensor & Senjata', unit:'Radar Searching', multi:1, q:1,
+   params:[P('Jangkauan deteksi','naik',{u:'km'}), UPD('Kecepatan pendeteksian'), STAB(), P('Air dryer','naik',{u:'m³/min'}), P('Keakuratan target','deviasi',{u:'km',ls:'Jarak referensi',ln:'Jarak terdeteksi radar'})], h:H_RASIO},
+  {k:'radartrack', n:'Radar Tracking', g:'S', c:'Sensor & Senjata', unit:'Radar Tracking', multi:1, q:1,
+   params:[P('Jangkauan deteksi','naik',{u:'km'}), UPD('Kecepatan pendeteksian'), STAB(), P('Air dryer','naik',{u:'m³/min'}), P('Keakuratan target','deviasi',{u:'°',ls:'Bearing referensi',ln:'Bearing terukur'})], h:H_RASIO},
+  {k:'sonar', n:'Sonar', g:'S', c:'Sensor & Senjata', unit:'Sonar', multi:1, q:1,
+   params:[P('Jangkauan deteksi','naik',{u:'km'}), STAB(), P('Sensitivitas transduser','naik',{u:'km',ls:'Jarak deteksi maksimum',ln:'Jarak deteksi minimum'}), DISP(), P('Kondisi dome','skala',{sk:'dome'}), P('Keakuratan target','deviasi',{u:'km',ls:'Jarak referensi',ln:'Jarak terdeteksi sonar'}), P('Kemampuan pelacakan','skala',{sk:'lacak'})], h:H_RASIO},
+  {k:'ssm', n:'Sistem SSM (mis. Exocet MM40 B3)', g:'S', c:'Sensor & Senjata', vital:1, unit:'SSM', multi:1, q:1,
+   params:[STAB(), DISP(), PANEL(), P('Jumlah launcher aktif','naik',{u:'launcher'})], h:H_RASIO},
+  {k:'sam', n:'Sistem SAM (mis. VL MICA)', g:'S', c:'Sensor & Senjata', vital:1, unit:'SAM', multi:1, q:1,
+   params:[STAB(), DISP(), PANEL(), P('Jumlah launcher aktif','naik',{u:'launcher'})], h:H_RASIO},
+  {k:'torpedo', n:'Sistem Torpedo (mis. A244 S Mod 3)', g:'S', c:'Sensor & Senjata', unit:'Torpedo', multi:1, q:1,
+   params:[STAB(), DISP(), PANEL(), P('Jumlah peluncur aktif','naik',{u:'tabung'}), P('Tekanan kompresor udara','naik',{u:'bar'})], h:H_RASIO},
+  {k:'m76', n:'Meriam 76 mm', g:'S', c:'Sensor & Senjata', vital:1, unit:'Meriam 76 mm', multi:1, q:1,
+   params:[P('Kecepatan tembak','naik',{u:'peluru/menit'}), P('Akurasi tembakan','naik',{u:'tembakan',d:10,ls:'Jumlah tembakan',ln:'Mengenai target'}), P('Jangkauan tembakan','naik',{u:'km'}), P('Akurasi sudut','deviasi',{u:'°',ls:'Sudut perintah',ln:'Sudut aktual'}), P('Training dan elevasi','skala',{sk:'elevasi'}), STAB(),
+           P('Stabilitas tekanan nitrogen dan oli','gabungan',{subs:[['Recuperator loading tray','bar'],['Recuperator recoil-counterrecoil brake','bar'],['HPU','bar']]})],
+   h:H_RASIO + ' Parameter tekanan nitrogen dan oli = rata-rata dari tekanan yang diukur (setelah 1 jam digerakkan).'},
+  {k:'m35', n:'Meriam 35 mm', g:'S', c:'Sensor & Senjata', unit:'Meriam 35 mm', multi:1, q:1,
+   params:[P('Kecepatan tembak','naik',{u:'peluru/menit'}), P('Akurasi tembakan','naik',{u:'tembakan',d:10,ls:'Jumlah tembakan',ln:'Mengenai target'}), P('Jangkauan tembakan','naik',{u:'km'}), P('Akurasi sudut','deviasi',{u:'°',ls:'Sudut perintah',ln:'Sudut aktual'}), P('Training dan elevasi','skala',{sk:'elevasi'}), STAB(),
+           P('Stabilitas tekanan nitrogen dan oli','gabungan',{subs:[['Akumulator kanan dan kiri','bar'],['Cocking spring kanan dan kiri','bar'],['HPP','bar']]})],
+   h:H_RASIO + ' Parameter tekanan nitrogen dan oli = rata-rata dari tekanan yang diukur (setelah 5 menit digerakkan).'},
+  {k:'m20', n:'Meriam 20 mm', g:'S', c:'Sensor & Senjata', unit:'Meriam 20 mm', multi:1, q:1,
+   params:[P('Kecepatan tembak','naik',{u:'peluru/menit'}), P('Akurasi tembakan','naik',{u:'tembakan',d:10,ls:'Jumlah tembakan',ln:'Mengenai target'}), P('Jangkauan tembakan','naik',{u:'km'}), P('Pre-firing check','skala',{sk:'prefiring'})],
+   h:H_RASIO + ' Pre-firing check: gerak naik-turun halus, span tanpa hambatan, pengisian tidak macet, trigger bekerja baik.'},
+  {k:'esm', n:'Pernika — ESM', g:'S', c:'Pernika', unit:'ESM', multi:1, q:1,
+   params:[P('Jangkauan deteksi','naik',{u:'km'}), UPD('Kecepatan deteksi'), STAB(), P('Keakuratan deteksi','deviasi',{u:'GHz',ls:'Frekuensi radar referensi',ln:'Frekuensi tertangkap ESM'})], h:H_RASIO},
+  {k:'ecm', n:'Pernika — ECM', g:'S', c:'Pernika', unit:'ECM', multi:1, q:1,
+   params:[P('Area cakupan jamming','naik',{u:'km'}), UPD('Kecepatan jamming'), STAB(), P('Efektivitas jamming','efektivitas',{u:'km'})],
+   h:H_RASIO + ' Efektivitas jamming = (1 − jarak deteksi kapal setelah ECM aktif ÷ sebelum) × 100%. Jika target hilang sama sekali, isi 0 → 100%.'},
+  {k:'decoy', n:'Pernika — Decoy', g:'S', c:'Pernika', unit:'Decoy', multi:1, q:1,
+   params:[P('Kesiapan decoy','naik',{u:'buah',ls:'Jumlah standar',ln:'Jumlah siap'}), UPD('Kecepatan aktivasi')], h:H_RASIO},
+  {k:'cms', n:'Combat Management System (CMS)', g:'S', c:'Sistem Tempur', unit:'CMS', multi:1, q:1,
+   params:[UPD('Kecepatan proses data'), P('Integrasi sistem','naik',{u:'sistem',ls:'Sistem terintegrasi (standar)',ln:'Sistem terintegrasi saat ini'}), STAB(), DISP()],
+   h:H_RASIO + ' Integrasi: jumlah sistem yang terhubung (Own Ship Data, radar, senjata, AIS, Link Y, dll.).'},
+  {k:'diu', n:'Data Interface Unit (DIU)', g:'S', c:'Sistem Tempur', unit:'DIU', multi:1, q:1,
+   params:[P('Kecepatan transfer data','naik',{u:'Mbps'}), P('Stabilitas data','naik',{u:'jam',d:24,ls:'Standar',ln:'Stabil'}), P('Kualitas sinyal data','skala',{sk:'sinyal'})], h:H_RASIO},
+  {k:'viu', n:'Video Interface Unit (VIU)', g:'S', c:'Sistem Tempur', unit:'VIU', multi:1, q:1,
+   params:[P('Kecepatan transfer data','naik',{u:'Mbps'}), P('Stabilitas data','naik',{u:'jam',d:24,ls:'Standar',ln:'Stabil'}), P('Kualitas sinyal data','skala',{sk:'sinyal'})], h:H_RASIO},
+  {k:'ecc', n:'Environmental Conditioning Cabinet (ECC)', g:'S', c:'Sistem Tempur', unit:'ECC', multi:1, q:1,
+   params:[P('Kapasitas daya','naik',{u:'VA'}), PANEL(), P('Server','skala',{sk:'server'}), STAB()], h:H_RASIO},
+  {k:'alk_eks', n:'Alkom Eksternal', g:'S', c:'Komunikasi', unit:'Alkom Eksternal', multi:0, mode:'bobot',
+   params:[ALK('RX HF',10), ALK('TRX HF',15), ALK('TRX VHF',10), ALK('TRX UHF',10), ALK('TRX V/UHF',10), ALK('KOMSAT',15), ALK('Alpernika',10), ALK('Alkom VBSS',5), ALK('Lampu Isyarat',5), ALK('MHS',5), ALK('UWC/UWT',5)],
+   h:'Konis = jumlah dari (bobot × jumlah siap ÷ standardisasi jumlah sesuai kelas). Bobot bawaan mengikuti contoh SE untuk kelas PKR REM; sesuaikan bila kelas Anda berbeda. Isi standar 0 bila kelas kapal tidak dilengkapi alat tersebut: bobotnya tidak dihitung dan sisanya dinormalkan ke 100%.'},
+  {k:'alk_int', n:'Alkom Internal', g:'S', c:'Komunikasi', unit:'Alkom Internal', multi:0, mode:'bobot',
+   params:[ALK('Matrix Sistem',20), ALK('Tactical Intercom',25), ALK('PABX',15), ALK('PAGA',15), ALK('SPT',15), ALK('Sistem Hiburan',5), ALK('LAN',5)],
+   h:'Konis = jumlah dari (bobot × jumlah siap ÷ standardisasi jumlah sesuai kelas). Bobot bawaan mengikuti contoh SE (PKR REM). Isi standar 0 bila kelas tidak dilengkapi alat tersebut.'},
+  {k:'alk_kes', n:'Alkom Keselamatan', g:'S', c:'Komunikasi', unit:'Alkom Keselamatan', multi:0, mode:'bobot',
+   params:[ALK('MF/HF',10), ALK('VHF MB Distress',30), ALK('VHF Distress HT',10), ALK('SART',25), ALK('EPIRB',25)],
+   h:'Konis = jumlah dari (bobot × jumlah siap ÷ standardisasi jumlah sesuai kelas). Bobot bawaan mengikuti contoh SE (PKR REM). Isi standar 0 bila kelas tidak dilengkapi alat tersebut.'},
+  {k:'lain_s', n:'Peralatan Sewaco/Komlek Lainnya', g:'S', c:'Lainnya', unit:'Peralatan', multi:1, q:1,
+   params:[P('Kondisi fungsi','persen')], h:H_FUNGSI}
+];
+const TPLK = Object.fromEntries(TPL.map(t => [t.k, t]));
+const DEF_BANTU = ['bakap','mpk','gearbox','dg','pompa','kompresor','separator','ro','fan','fr','ac','lier','crane','rantai','jangkar','kemudi','pmk','rhib','lr','radarnav','gps','gyro','echo','speedlog','ais','alk_eks','alk_int','alk_kes'];
+const DEF_TEMPUR = ['bakap','mpk','gearbox','dg','pompa','kompresor','separator','ro','fan','fr','ac','lier','rantai','jangkar','fin','kemudi','pmk','rhib','lr','radarnav','gps','gyro','echo','speedlog','nddu','repeater','ais','clock','radarsearch','radartrack','cms','esm','decoy','alk_eks','alk_int','alk_kes'];
+const BOBOT = {tempur:[40, 60], bantu:[60, 40]};
+const GN = {P:'Platform', S:'Sewaco/Komunikasi'};
+
+/* ---------- pembuatan objek ---------- */
+function mkParam(d){
+  const p = {id:uid(), l:d.l, t:d.t, u:d.u || '', std: d.d != null ? String(d.d) : '', now:''};
+  if (d.sk) p.sk = d.sk;
+  if (d.ls) p.ls = d.ls;
+  if (d.ln) p.ln = d.ln;
+  if (d.b != null) p.b = String(d.b);
+  if (d.subs) p.subs = d.subs.map(([l, u]) => ({l, u, std:'', now:''}));
+  return p;
+}
+function mkUnit(tpl, i){ return {id:uid(), nama: tpl.multi ? `${tpl.unit} ${i}` : tpl.unit, mode: tpl.mode || 'avg', params: tpl.params.map(mkParam)}; }
+function mkSystem(tpl, q){ return {id:uid(), k:tpl.k, nama:tpl.n, g:tpl.g, vital:!!tpl.vital, units:Array.from({length: tpl.multi ? Math.max(1, q || 1) : 1}, (_, i) => mkUnit(tpl, i + 1))}; }
+function newShip(){ return {id:uid(), nama:'', lambung:'', kelas:'', satker:'', jenis:'tempur', bP:40, bS:60, tgl:today(), periode:thisMonth(), systems:[], rb:{on:false, alasan:''}, ttd:{}, catatan:'', updated:Date.now()}; }
+
+/* ---------- perhitungan ---------- */
+function monthsLate(exp, ref){
+  // jumlah bulan lewat kadaluwarsa; sisa hari dibulatkan ke atas menjadi 1 bulan
+  const [y1, m1, d1] = exp.split('-').map(Number), [y2, m2, d2] = ref.split('-').map(Number);
+  if (ref <= exp) return 0;
+  let mo = (y2 - y1) * 12 + (m2 - m1);
+  if (d2 > d1) mo += 1;
+  return Math.max(mo, 1);
+}
+function calcParam(p, ctx){
+  const s = num(p.std), n = num(p.now);
+  switch (p.t){
+    case 'naik':  if (s == null || n == null || s <= 0 || n < 0) return null; return clamp(n / s * 100);
+    case 'turun': if (s == null || n == null || s <= 0 || n < 0) return null; return n <= s ? 100 : clamp(s / n * 100);
+    case 'suhu':
+      if (s == null || n == null) return null;
+      if (n <= s) return 100;
+      if (s > 0) return clamp(s / n * 100);
+      if (s < 0) return n < 0 ? clamp(Math.abs(n) / Math.abs(s) * 100) : 0;
+      return 0;
+    case 'deviasi': if (s == null || n == null || s === 0) return null; return clamp((1 - Math.abs(n - s) / Math.abs(s)) * 100);
+    case 'toleransi': if (s == null || n == null || s <= 0) return null; return clamp((1 - Math.abs(n) / s) * 100);
+    case 'efektivitas': if (s == null || n == null || s <= 0 || n < 0) return null; return clamp((1 - n / s) * 100);
+    case 'skala': case 'persen': return n == null ? null : clamp(n);
+    case 'kadaluwarsa': {
+      if (!p.now || !/^\d{4}-\d{2}-\d{2}$/.test(p.now)) return null;
+      const mo = monthsLate(p.now, ctx.tgl || today());
+      return clamp((1 - mo / 12) * 100);
+    }
+    case 'gabungan': {
+      if (!p.subs || !p.subs.length) return null;
+      let t = 0;
+      for (const sb of p.subs){ const a = num(sb.std), b = num(sb.now); if (a == null || b == null || a <= 0 || b < 0) return null; t += clamp(b / a * 100); }
+      return t / p.subs.length;
+    }
+  }
+  return null;
+}
+function formula(p, ctx){
+  const s = num(p.std), n = num(p.now), v = calcParam(p, ctx);
+  if (v == null) return '';
+  const cap = x => x > 100 ? ' (dibatasi 100%)' : '';
+  switch (p.t){
+    case 'naik': return `${fnum(n)} ÷ ${fnum(s)} × 100%${cap(n / s * 100)}`;
+    case 'turun': return n <= s ? `${fnum(n)} ≤ ${fnum(s)} (standar) → 100%` : `${fnum(s)} ÷ ${fnum(n)} × 100%`;
+    case 'suhu': return n <= s ? `${fnum(n)} ≤ ${fnum(s)} (tercapai) → 100%` : (s > 0 ? `${fnum(s)} ÷ ${fnum(n)} × 100%` : (s < 0 && n < 0 ? `${fnum(Math.abs(n))} ÷ ${fnum(Math.abs(s))} × 100%` : 'Tidak mencapai suhu → 0%'));
+    case 'deviasi': return `deviasi ${fnum(Math.abs(n - s))} → (1 − ${fnum(Math.abs(n - s))} ÷ ${fnum(Math.abs(s))}) × 100%`;
+    case 'toleransi': return `(1 − ${fnum(Math.abs(n))} ÷ ${fnum(s)}) × 100%`;
+    case 'efektivitas': return `(1 − ${fnum(n)} ÷ ${fnum(s)}) × 100%`;
+    case 'skala': return 'Kondisi dipilih';
+    case 'persen': return 'Penilaian fungsi';
+    case 'kadaluwarsa': { const mo = monthsLate(p.now, ctx.tgl || today()); return mo === 0 ? `Berlaku s.d. ${fTgl(p.now)} → 100%` : `Lewat ${mo} bulan (per ${fTgl(ctx.tgl)}) → (1 − ${mo} ÷ 12) × 100%`; }
+    case 'gabungan': return `Rata-rata ${p.subs.length} tekanan`;
+  }
+  return '';
+}
+function calcUnit(u, ctx){
+  let total = 0, filled = 0, sum = 0, wsum = 0;
+  for (const p of u.params){
+    if (u.mode === 'bobot'){
+      if (num(p.std) === 0) continue;                // tidak dilengkapi di kelas ini
+      total++;
+      const v = calcParam(p, ctx); if (v == null) continue;
+      const b = num(p.b) || 0; filled++; sum += b * v; wsum += b;
+    } else {
+      total++;
+      const v = calcParam(p, ctx); if (v == null) continue;
+      filled++; sum += v;
+    }
+  }
+  let v = null;
+  if (u.mode === 'bobot') v = wsum > 0 ? sum / wsum : null;
+  else v = filled ? sum / filled : null;
+  return {v, filled, total};
+}
+function calcSystem(sys, ctx){
+  const units = sys.units.map(u => Object.assign({unit:u}, calcUnit(u, ctx)));
+  const ok = units.filter(x => x.v != null);
+  return {sys, units, v: ok.length ? ok.reduce((a, x) => a + x.v, 0) / ok.length : null,
+          filled: units.reduce((a, x) => a + x.filled, 0), total: units.reduce((a, x) => a + x.total, 0)};
+}
+function calcShip(ship){
+  const ctx = {tgl: ship.tgl || today()};
+  const grp = g => {
+    const systems = ship.systems.filter(s => s.g === g).map(s => calcSystem(s, ctx));
+    const ok = systems.filter(x => x.v != null);
+    return {systems, n: systems.length, v: ok.length ? ok.reduce((a, x) => a + x.v, 0) / ok.length : null,
+            filled: systems.reduce((a, x) => a + x.filled, 0), total: systems.reduce((a, x) => a + x.total, 0)};
+  };
+  const P_ = grp('P'), S_ = grp('S');
+  const bP = num(ship.bP) ?? 50, bS = num(ship.bS) ?? 50;
+  let T = null;
+  if (P_.n && S_.n){ if (P_.v != null && S_.v != null && bP + bS > 0) T = (bP * P_.v + bS * S_.v) / (bP + bS); }
+  else if (P_.n && P_.v != null) T = P_.v;
+  else if (S_.n && S_.v != null) T = S_.v;
+  const vital = [];
+  for (const x of [...P_.systems, ...S_.systems]) if (x.sys.vital){
+    if (x.v != null && x.v < 60) vital.push({nama:x.sys.nama, v:x.v});
+    for (const u of x.units) if (u.v != null && u.v < 60 && x.units.length > 1) vital.push({nama:`${x.sys.nama} › ${u.unit.nama}`, v:u.v});
+  }
+  return {ctx, P:P_, S:S_, T, bP, bS, vital, filled: P_.filled + S_.filled, total: P_.total + S_.total};
+}
+function finalStatus(ship, r){
+  if (r.T == null) return null;
+  if (ship.rb && ship.rb.on) return Object.assign({}, ST.RB, {override:true});
+  return status(r.T);
+}
+
+/* ---------- penyimpanan & enkripsi PIN (AES-GCM, kunci dari PBKDF2) ---------- */
+let state = {v:1, ships:[], history:[]};
+const sess = {key:null, salt:null, blob:null, locked:false, fails:0, waitUntil:0, hiddenAt:0};
+const ui = {tab:{}, open:{}};
+const b64 = buf => btoa(String.fromCharCode(...new Uint8Array(buf)));
+const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const hasCrypto = () => !!(window.crypto && crypto.subtle);
+async function deriveKey(pin, salt){
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pin), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2', salt, iterations:250000, hash:'SHA-256'}, base, {name:'AES-GCM', length:256}, false, ['encrypt', 'decrypt']);
+}
+let saveT = null;
+function save(){ clearTimeout(saveT); saveT = setTimeout(persist, 300); }
+async function persist(){
+  clearTimeout(saveT);
+  if (sess.locked) return;
+  try {
+    const json = JSON.stringify(state);
+    if (sess.key){
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const ct = await crypto.subtle.encrypt({name:'AES-GCM', iv}, sess.key, new TextEncoder().encode(json));
+      localStorage.setItem(KEY, JSON.stringify({enc:1, v:1, salt:b64(sess.salt), iv:b64(iv), data:b64(ct)}));
+    } else localStorage.setItem(KEY, json);
+  } catch (e){ toast('Gagal menyimpan: ' + e.message); }
+}
+function load(){
+  const raw = localStorage.getItem(KEY);
+  if (!raw){ state = {v:1, ships:[], history:[]}; return; }
+  try {
+    const o = JSON.parse(raw);
+    if (o.enc){ sess.blob = o; sess.locked = true; state = {v:1, ships:[], history:[]}; return; }
+    state = Object.assign({v:1, ships:[], history:[]}, o);
+  } catch (e){ state = {v:1, ships:[], history:[]}; toast('Data rusak, mulai dari kosong.'); }
+}
+async function unlock(pin){
+  const o = sess.blob, salt = unb64(o.salt);
+  const key = await deriveKey(pin, salt);
+  const pt = await crypto.subtle.decrypt({name:'AES-GCM', iv:unb64(o.iv)}, key, unb64(o.data));
+  state = Object.assign({v:1, ships:[], history:[]}, JSON.parse(new TextDecoder().decode(pt)));
+  sess.key = key; sess.salt = salt; sess.locked = false; sess.blob = null; sess.fails = 0;
+}
+async function lockNow(){
+  if (!sess.key) return;
+  await persist();
+  sess.key = null; sess.salt = null;
+  load(); render();
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden){ sess.hiddenAt = Date.now(); persist(); }
+  else if (sess.key && sess.hiddenAt && Date.now() - sess.hiddenAt > LOCK_AFTER_MS) lockNow();
+});
+window.addEventListener('pagehide', () => { persist(); });
+
+/* ---------- akses data ---------- */
+const getShip = id => state.ships.find(s => s.id === id);
+const touch = ship => { ship.updated = Date.now(); save(); };
+
+/* ---------- UI helpers ---------- */
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2400); }
+function modal(html){ const m = $('#modal'); m.innerHTML = `<div class="sheet" role="dialog" aria-modal="true">${html}</div>`; m.hidden = false; const f = m.querySelector('input,select,textarea'); if (f) setTimeout(() => f.focus(), 50); }
+function closeModal(){ const m = $('#modal'); m.hidden = true; m.innerHTML = ''; }
+$('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+function go(h){ if (location.hash === '#' + h) render(); else location.hash = h; }
+function statusPill(st){ if (!st) return '<span class="pill na">Belum lengkap</span>'; return `<span class="pill ${st.cls}">${st.k} · ${st.nama}</span>`; }
+function gauge(v, st){
+  const r = 52, c = 2 * Math.PI * r, f = v == null ? 0 : Math.max(0, Math.min(1, v / 100));
+  return `<svg viewBox="0 0 128 128" class="gauge" role="img" aria-label="Konis total ${v == null ? 'belum ada' : fmt(v) + ' persen'}">
+    <circle cx="64" cy="64" r="${r}" class="g-bg"/>
+    <circle cx="64" cy="64" r="${r}" class="g-fg ${st ? st.cls : ''}" stroke-dasharray="${(c * f).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 64 64)"/>
+    <text x="64" y="66" class="g-v">${v == null ? '–' : fmt(v, 1)}</text><text x="64" y="86" class="g-u">persen</text></svg>`;
+}
+const barHTML = v => `<div class="bar"><i class="${cls(v)}" style="width:${v == null ? 0 : Math.max(2, v)}%"></i></div>`;
+function download(name, text, type){
+  const blob = new Blob([text], {type});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+const safeName = s => String(s || 'kri').replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '_') || 'kri';
+
+/* =====================================================================
+   VIEW: BERANDA
+   ===================================================================== */
+function vHome(){
+  const ships = state.ships.slice().sort((a, b) => (b.updated || 0) - (a.updated || 0));
+  let html = '';
+  if (!ships.length){
+    html = `<div class="card empty"><div class="ico">⚓</div><h2>Belum ada kapal</h2>
+      <p class="muted">Tambahkan KRI Anda, pilih pesawat yang terpasang, lalu isi hasil pengukuran. Nilai Konis dihitung otomatis sesuai Surat Edaran Aslog Kasal.</p>
+      <a class="btn pri" href="#/kapal/baru">+ Tambah Kapal</a></div>`;
+  } else {
+    html = ships.map(s => {
+      const r = calcShip(s), st = finalStatus(s, r);
+      return `<a class="card ship" href="#/kapal/${s.id}">
+        <div class="grow"><b>${esc(s.nama || 'Tanpa nama')}</b> ${s.lambung ? `<span class="muted">(${esc(s.lambung)})</span>` : ''}
+          <div class="small muted">${esc(s.kelas || '')}${s.kelas ? ' · ' : ''}Kapal ${s.jenis === 'tempur' ? 'Tempur' : 'Bantu'} · ${fPeriode(s.periode)}</div>
+          <div style="margin-top:6px">${statusPill(st)}</div></div>
+        <div class="big ${st ? 'c-' + st.cls : 'muted'}">${r.T == null ? '–' : fmt(r.T, 1) + '%'}<div class="small muted" style="font-weight:400">${r.filled}/${r.total} param</div></div></a>`;
+    }).join('');
+    html += `<a class="btn pri fab" href="#/kapal/baru">+ Kapal</a>`;
+  }
+  html += `<p class="small muted" style="text-align:center;margin-top:18px">🔒 Data hanya tersimpan di perangkat ini dan tidak dikirim ke mana pun.</p>`;
+  return {title:'KONIS KRI', sub:'Kondisi Teknis KRI', html, right:`<button class="ib" data-act="nav" data-h="/pengaturan" aria-label="Pengaturan">⚙</button>`};
+}
+
+/* =====================================================================
+   VIEW: FORM KAPAL (baru / ubah)
+   ===================================================================== */
+let draft = null;
+function vShipForm(id){
+  const edit = !!id;
+  if (!draft || draft._for !== (id || 'new')){
+    const base = edit ? clone(getShip(id)) : newShip();
+    if (!base) return vNotFound();
+    draft = {_for: id || 'new', ship: base, sel: {}, qty: {}};
+    if (edit) base.systems.forEach(s => draft.sel[s.k] = true);
+    else DEF_TEMPUR.forEach(k => draft.sel[k] = true);
+    TPL.forEach(t => draft.qty[t.k] = t.q || 1);
+  }
+  const s = draft.ship;
+  const existing = new Set(edit ? getShip(id).systems.map(x => x.k) : []);
+  const cats = {};
+  TPL.forEach(t => { (cats[t.g + '|' + t.c] = cats[t.g + '|' + t.c] || []).push(t); });
+  let list = '';
+  let lastG = '';
+  for (const key of Object.keys(cats)){
+    const [g, c] = key.split('|');
+    if (g !== lastG){ list += `<h3 style="margin-top:18px">${GN[g]}</h3>`; lastG = g; }
+    list += `<div class="catT">${esc(c)}</div>`;
+    list += cats[key].map(t => {
+      const on = !!draft.sel[t.k], ex = existing.has(t.k);
+      const step = t.multi && !ex ? `<div class="step"><button type="button" data-act="qty" data-k="${t.k}" data-d="-1" aria-label="Kurangi">−</button><span id="q-${t.k}">${draft.qty[t.k]}</span><button type="button" data-act="qty" data-k="${t.k}" data-d="1" aria-label="Tambah">+</button></div>` : (ex && t.multi ? '<span class="small muted">sudah ada</span>' : '');
+      return `<label class="chk"><input type="checkbox" data-sel="${t.k}" ${on ? 'checked' : ''}><span class="n">${t.vital ? '<span class="star">★</span> ' : ''}${esc(t.n)}</span>${step}</label>`;
+    }).join('');
+  }
+  const html = `
+  <div class="card">
+    <h2>Identitas kapal</h2>
+    <label class="f"><span>Nama KRI *</span><input class="t" data-sf="nama" value="${esc(s.nama)}" placeholder="mis. KRI Contoh-123" autocomplete="off"></label>
+    <div class="pair">
+      <label class="f"><span>Nomor lambung</span><input class="t" data-sf="lambung" value="${esc(s.lambung)}" autocomplete="off"></label>
+      <label class="f"><span>Kelas</span><input class="t" data-sf="kelas" value="${esc(s.kelas)}" placeholder="mis. PKR" autocomplete="off"></label>
+    </div>
+    <label class="f"><span>Kotama/Satker</span><input class="t" data-sf="satker" value="${esc(s.satker)}" autocomplete="off"></label>
+    <span class="small muted" style="font-weight:600">Jenis kapal *</span>
+    <div class="jenis" style="margin:6px 0 12px">
+      <label><input type="radio" name="jenis" value="tempur" ${s.jenis === 'tempur' ? 'checked' : ''}><b>Kapal Tempur</b><span class="small muted">Platform 40% · Sewaco 60%</span></label>
+      <label><input type="radio" name="jenis" value="bantu" ${s.jenis === 'bantu' ? 'checked' : ''}><b>Kapal Bantu</b><span class="small muted">Platform 60% · Sewaco 40%</span></label>
+    </div>
+    <div class="pair">
+      <label class="f"><span>Bobot Platform (%)</span><input class="t" inputmode="decimal" data-sf="bP" value="${esc(s.bP)}"></label>
+      <label class="f"><span>Bobot Sewaco/Kom (%)</span><input class="t" inputmode="decimal" data-sf="bS" value="${esc(s.bS)}"></label>
+    </div>
+    <p class="small muted" style="margin:0">Bobot bawaan mengikuti contoh SE. Ubah bila Kotama/Satker menetapkan bobot lain sesuai peran kapal (rumus C SE untuk kapal bantu: 50:50). Jumlah bobot harus 100%.</p>
+  </div>
+  <div class="card">
+    <h2>Pesawat yang terpasang</h2>
+    <p class="small muted" style="margin-top:0">Centang pesawat yang ada di kapal. Angka di kanan = jumlah unit (mis. 4 MPK). Unit bisa ditambah, diganti nama, atau dihapus nanti. <span class="star">★</span> = komponen vital.</p>
+    ${!edit ? `<div class="btns" style="margin-bottom:6px"><button class="btn" data-act="preset" data-j="tempur">Isian umum kapal tempur</button><button class="btn" data-act="preset" data-j="bantu">Isian umum kapal bantu</button></div>` : ''}
+    ${list}
+  </div>
+  <div class="btns" style="margin-bottom:20px"><button class="btn pri block" data-act="saveShip">${edit ? 'Simpan perubahan' : 'Buat kapal'}</button></div>`;
+  return {title: edit ? 'Ubah Kapal' : 'Kapal Baru', back: edit ? `/kapal/${id}` : '/', html,
+    onInput(e){
+      const k = e.target.dataset.sf;
+      if (k){ s[k] = e.target.value;
+        if (k === 'bP'){ const v = num(e.target.value); if (v != null){ s.bS = String(+(100 - v).toFixed(2)); $('[data-sf=bS]').value = s.bS; } }
+        if (k === 'bS'){ const v = num(e.target.value); if (v != null){ s.bP = String(+(100 - v).toFixed(2)); $('[data-sf=bP]').value = s.bP; } }
+      }
+    },
+    onChange(e){
+      if (e.target.name === 'jenis'){ s.jenis = e.target.value; [s.bP, s.bS] = BOBOT[s.jenis].map(String);
+        if (!edit){ draft.sel = {}; (s.jenis === 'bantu' ? DEF_BANTU : DEF_TEMPUR).forEach(k => draft.sel[k] = true); render(); toast('Daftar pesawat disesuaikan dengan ' + (s.jenis === 'bantu' ? 'kapal bantu' : 'kapal tempur')); }
+        else { $('[data-sf=bP]').value = s.bP; $('[data-sf=bS]').value = s.bS; } }
+      if (e.target.dataset.sel) draft.sel[e.target.dataset.sel] = e.target.checked;
+    }};
+}
+const ACT = {};
+ACT.qty = el => { const k = el.dataset.k; draft.qty[k] = Math.max(1, Math.min(20, draft.qty[k] + +el.dataset.d)); $('#q-' + k).textContent = draft.qty[k]; draft.sel[k] = true; const cb = $(`[data-sel="${k}"]`); if (cb) cb.checked = true; };
+ACT.preset = el => { draft.sel = {}; TPL.forEach(t => draft.qty[t.k] = t.q || 1);(el.dataset.j === 'bantu' ? DEF_BANTU : DEF_TEMPUR).forEach(k => draft.sel[k] = true); render(); };
+ACT.saveShip = () => {
+  const d = draft.ship;
+  if (!String(d.nama).trim()){ toast('Nama KRI wajib diisi'); $('[data-sf=nama]').focus(); return; }
+  const bP = num(d.bP), bS = num(d.bS);
+  if (bP == null || bS == null || bP < 0 || bS < 0 || Math.abs(bP + bS - 100) > 0.001){ toast('Bobot Platform + Sewaco harus 100%'); return; }
+  const chosen = TPL.filter(t => draft.sel[t.k]);
+  if (!chosen.length){ toast('Pilih minimal satu pesawat'); return; }
+  const edit = draft._for !== 'new';
+  if (edit){
+    const ship = getShip(draft._for);
+    const removed = ship.systems.filter(x => !draft.sel[x.k]);
+    const hasData = removed.filter(x => x.units.some(u => calcUnit(u, {tgl:ship.tgl}).filled > 0));
+    if (hasData.length && !confirm(`Pesawat berikut akan dihapus beserta datanya:\n• ${hasData.map(x => x.nama).join('\n• ')}\n\nLanjutkan?`)) return;
+    Object.assign(ship, {nama:d.nama.trim(), lambung:d.lambung, kelas:d.kelas, satker:d.satker, jenis:d.jenis, bP, bS});
+    ship.systems = ship.systems.filter(x => draft.sel[x.k]);
+    const have = new Set(ship.systems.map(x => x.k));
+    chosen.forEach(t => { if (!have.has(t.k)) ship.systems.push(mkSystem(t, draft.qty[t.k])); });
+    sortSystems(ship); touch(ship); draft = null; go(`/kapal/${ship.id}`); toast('Perubahan tersimpan');
+  } else {
+    d.nama = d.nama.trim(); d.bP = bP; d.bS = bS;
+    d.systems = chosen.map(t => mkSystem(t, draft.qty[t.k]));
+    delete d._for; state.ships.push(d); touch(d); draft = null; go(`/kapal/${d.id}`); toast('Kapal dibuat. Silakan isi data pesawat.');
+  }
+};
+function sortSystems(ship){ const order = Object.fromEntries(TPL.map((t, i) => [t.k, i])); ship.systems.sort((a, b) => (order[a.k] ?? 999) - (order[b.k] ?? 999)); }
+
+/* =====================================================================
+   VIEW: KAPAL (ringkasan + daftar pesawat)
+   ===================================================================== */
+function vShip(id){
+  const ship = getShip(id); if (!ship) return vNotFound();
+  const r = calcShip(ship), st = finalStatus(ship, r);
+  const tab = ui.tab[id] || 'P';
+  const G = r[tab];
+  const sysHTML = G.systems.length ? G.systems.map(x => {
+    const t = TPLK[x.sys.k] || {}; const multi = t.multi || x.units.length > 1;
+    const open = ui.open[x.sys.id];
+    const head = multi
+      ? `<button class="sys-h" data-act="toggle" data-sid="${x.sys.id}" aria-expanded="${open ? 'true' : 'false'}">`
+      : `<button class="sys-h" data-act="nav" data-h="/kapal/${id}/unit/${x.sys.id}/${x.units[0].unit.id}">`;
+    let units = '';
+    if (multi && open){
+      units = `<div class="units">${x.units.map(u => `<a class="unit-row" href="#/kapal/${id}/unit/${x.sys.id}/${u.unit.id}"><span class="n">${esc(u.unit.nama)} <span class="small muted">· ${u.filled}/${u.total}</span></span><b class="${u.v == null ? 'muted' : 'c-' + cls(u.v)}">${pct(u.v)}</b><span class="chev">›</span></a>`).join('')}
+        <button class="add-unit" data-act="addUnit" data-sid="${x.sys.id}">+ Tambah unit ${esc(t.unit || '')}</button></div>`;
+    }
+    return `<div class="sys">${head}<span class="t">${x.sys.vital ? '<span class="star">★</span> ' : ''}${esc(x.sys.nama)}<small>${x.units.length} unit · ${x.filled}/${x.total} parameter terisi ${multi ? (open ? '▲' : '▼') : '›'}</small></span><span class="v ${x.v == null ? 'muted' : 'c-' + cls(x.v)}">${pct(x.v)}</span></button>${barHTML(x.v)}${units}</div>`;
+  }).join('') : `<div class="card muted">Tidak ada pesawat ${GN[tab]}. Tambahkan lewat menu ✎ Ubah kapal.</div>`;
+
+  const vitalHTML = r.vital.length ? `<div class="warn"><b>⚠ Komponen vital di bawah 60% (Rusak Berat):</b><br>${r.vital.map(v => `• ${esc(v.nama)}: ${pct(v.v)}`).join('<br>')}<br><span class="small">Sesuai SE, Konis Total dapat ditetapkan RB sesuai kebijakan Kotama. Putuskan di halaman Laporan.</span></div>` : '';
+  const html = `
+  <div class="card">
+    <div class="sum">${gauge(r.T, st)}
+      <div class="grow">
+        <div>${statusPill(st)}${st && st.override ? ' <span class="small c-rb">(ditetapkan)</span>' : ''}</div>
+        ${st ? `<div class="small" style="margin-top:4px"><b>${st.siap}</b> · ${st.laik}</div>` : `<div class="small muted" style="margin-top:4px">Isi data Platform dan Sewaco untuk melihat Konis Total.</div>`}
+        <div class="kv" style="margin-top:6px"><span>Platform <span class="muted">(${fmt(r.bP, 0)}%)</span></span><b class="${r.P.v == null ? 'muted' : 'c-' + cls(r.P.v)}">${pct(r.P.v)}</b></div>
+        <div class="kv"><span>Sewaco/Kom <span class="muted">(${fmt(r.bS, 0)}%)</span></span><b class="${r.S.v == null ? 'muted' : 'c-' + cls(r.S.v)}">${pct(r.S.v)}</b></div>
+        <div class="small muted">${r.filled} dari ${r.total} parameter terisi</div>
+      </div></div>
+    ${vitalHTML}
+    <div class="pair" style="margin-top:12px">
+      <label class="f" style="margin:0"><span>Periode laporan</span><input class="t" type="month" data-shf="periode" value="${esc(ship.periode || '')}"></label>
+      <label class="f" style="margin:0"><span>Tanggal penilaian</span><input class="t" type="date" data-shf="tgl" value="${esc(ship.tgl || '')}"></label>
+    </div>
+  </div>
+  <div class="seg" role="tablist">
+    <button class="${tab === 'P' ? 'on' : ''}" data-act="tab" data-t="P" role="tab">Platform · ${pct(r.P.v, 1)}</button>
+    <button class="${tab === 'S' ? 'on' : ''}" data-act="tab" data-t="S" role="tab">Sewaco/Kom · ${pct(r.S.v, 1)}</button>
+  </div>
+  ${sysHTML}
+  <div class="bottom"><div class="btns"><button class="btn" data-act="nav" data-h="/kapal/${id}/riwayat">🕘 Riwayat</button><button class="btn pri" data-act="nav" data-h="/kapal/${id}/laporan">📄 Laporan</button></div></div>`;
+  return {title: ship.nama, sub: `Kapal ${ship.jenis === 'tempur' ? 'Tempur' : 'Bantu'}${ship.kelas ? ' · ' + ship.kelas : ''}`, back:'/', html,
+    right:`<button class="ib" data-act="nav" data-h="/kapal/${id}/edit" aria-label="Ubah kapal">✎</button><button class="ib" data-act="delShip" data-id="${id}" aria-label="Hapus kapal">🗑</button>`,
+    onChange(e){ const k = e.target.dataset.shf; if (k){ ship[k] = e.target.value; touch(ship); render(); } }};
+}
+ACT.tab = el => { const id = currentRoute()[1]; ui.tab[id] = el.dataset.t; render(); };
+ACT.toggle = el => { ui.open[el.dataset.sid] = !ui.open[el.dataset.sid]; render(); };
+ACT.addUnit = el => {
+  const id = currentRoute()[1], ship = getShip(id), sys = ship.systems.find(s => s.id === el.dataset.sid);
+  const t = TPLK[sys.k]; const u = mkUnit(t, sys.units.length + 1); sys.units.push(u); touch(ship);
+  go(`/kapal/${id}/unit/${sys.id}/${u.id}`);
+};
+ACT.delShip = el => {
+  const ship = getShip(el.dataset.id); if (!ship) return;
+  const nh = state.history.filter(h => h.shipId === ship.id).length;
+  if (!confirm(`Hapus ${ship.nama}${nh ? ` beserta ${nh} riwayat penilaian` : ''}? Tindakan ini tidak dapat dibatalkan.`)) return;
+  state.ships = state.ships.filter(s => s.id !== ship.id);
+  state.history = state.history.filter(h => h.shipId !== ship.id);
+  save(); go('/'); toast('Kapal dihapus');
+};
+
+/* =====================================================================
+   VIEW: EDITOR UNIT (isi parameter)
+   ===================================================================== */
+function inputHTML(p, k, label, extra = ''){
+  const val = p[k] ?? '';
+  return `<label class="inp"><span>${esc(label)}</span><div class="inw"><input inputmode="decimal" autocomplete="off" enterkeyhint="next" data-p="${p.id}" data-k="${k}" ${extra} value="${esc(val)}" aria-label="${esc(p.l + ' — ' + label)}">${p.u ? `<span class="u">${esc(p.u)}</span>` : ''}${NEG_OK[p.t] ? `<button type="button" class="pm" data-act="neg" data-p="${p.id}" data-k="${k}" aria-label="Ubah tanda plus/minus">±</button>` : ''}</div></label>`;
+}
+function resHTML(p, ctx){
+  const v = calcParam(p, ctx);
+  return v == null ? '<span>Belum diisi</span>' : `${esc(formula(p, ctx))} = <b class="c-${cls(v)}">${pct(v)}</b>`;
+}
+function paramHTML(p, u, ctx){
+  let body = '';
+  const [ls, ln] = LBL[p.t] || ['', ''];
+  switch (p.t){
+    case 'naik': case 'turun': case 'suhu': case 'deviasi': case 'toleransi': case 'efektivitas':
+      body = `<div class="pair">${inputHTML(p, 'std', p.ls || ls)}${inputHTML(p, 'now', p.ln || ln)}</div>`; break;
+    case 'skala':
+      body = (SK[p.sk] || SK.display).map(([v, t]) => `<label class="opt"><input type="radio" name="sk-${p.id}" value="${v}" data-p="${p.id}" data-k="now" ${num(p.now) === v ? 'checked' : ''}><span><b>${v}%</b> ${esc(t)}</span></label>`).join('')
+        + `<button type="button" class="mini" style="width:100%;margin-top:2px" data-act="clr" data-p="${p.id}">Kosongkan pilihan</button>`; break;
+    case 'persen':
+      body = `<div class="pair">${inputHTML(p, 'now', 'Nilai (0–100)')}<div></div></div><div class="quick">${[100, 75, 50, 25, 0].map(v => `<button type="button" data-act="qv" data-p="${p.id}" data-v="${v}">${v}%</button>`).join('')}</div>`; break;
+    case 'kadaluwarsa':
+      body = `<label class="inp"><span>Tanggal kadaluwarsa sertifikat</span><div class="inw"><input type="date" data-p="${p.id}" data-k="now" value="${esc(p.now)}"></div></label>`; break;
+    case 'gabungan':
+      body = (p.subs || []).map((sb, i) => `<div class="sub"><div class="sl">${esc(sb.l)}</div>
+        <label class="inp"><span>Standar</span><div class="inw"><input inputmode="decimal" data-p="${p.id}" data-s="${i}" data-k="std" value="${esc(sb.std)}"><span class="u">${esc(sb.u)}</span></div></label>
+        <label class="inp"><span>Saat ini</span><div class="inw"><input inputmode="decimal" data-p="${p.id}" data-s="${i}" data-k="now" value="${esc(sb.now)}"><span class="u">${esc(sb.u)}</span></div></label></div>`).join(''); break;
+  }
+  const bobot = u.mode === 'bobot' ? `<div class="pair" style="margin-bottom:8px">${inputHTML(Object.assign({}, p, {u:'%'}), 'b', 'Bobot')}<div></div></div>` : '';
+  return `<div class="prm" id="pr-${p.id}"><div class="prm-h"><div class="t">${esc(p.l)}<small>${esc(TIPE[p.t] || '')}</small></div><button type="button" class="mini" data-act="editParam" data-p="${p.id}" aria-label="Ubah parameter">⋯</button></div>${bobot}${body}<div class="res" id="r-${p.id}">${resHTML(p, ctx)}</div></div>`;
+}
+function ubarHTML(c){ return `<span>Nilai unit<br><span class="small muted">${c.filled}/${c.total} parameter terisi</span></span><b class="${c.v == null ? 'muted' : 'c-' + cls(c.v)}">${pct(c.v)}</b>`; }
+function bobotInfo(u){
+  if (u.mode !== 'bobot') return '';
+  const inc = u.params.filter(p => num(p.std) !== 0);
+  const tb = inc.reduce((a, p) => a + (num(p.b) || 0), 0);
+  return Math.abs(tb - 100) < 0.001 ? `Total bobot: <b>${fmt(tb, 0)}%</b> ✓` : `Total bobot alat yang dinilai: <b>${fmt(tb, 1)}%</b> — nilai dinormalkan ke 100%.`;
+}
+function vUnit(id, sid, uidd){
+  const ship = getShip(id); if (!ship) return vNotFound();
+  const sys = ship.systems.find(s => s.id === sid); if (!sys) return vNotFound();
+  const u = sys.units.find(x => x.id === uidd); if (!u) return vNotFound();
+  const t = TPLK[sys.k] || {}; const ctx = {tgl: ship.tgl || today()};
+  const c = calcUnit(u, ctx);
+  const html = `
+  <div class="ubar ${cls(c.v)}" id="ubar">${ubarHTML(c)}</div>
+  <label class="f"><span>Nama unit</span><input class="t" data-un="1" value="${esc(u.nama)}" autocomplete="off"></label>
+  ${t.h ? `<details class="hint"><summary>Cara penilaian sesuai SE</summary><p style="margin:8px 0 0">${esc(t.h)}</p></details>` : ''}
+  ${u.mode === 'bobot' ? `<div class="info" id="binfo" style="margin-bottom:10px">${bobotInfo(u)}</div>` : ''}
+  ${u.params.map(p => paramHTML(p, u, ctx)).join('')}
+  <button class="btn block" data-act="addParam" style="margin-bottom:10px">+ Tambah parameter</button>
+  <div class="btns" style="margin-bottom:12px">
+    ${t.multi ? `<button class="btn" data-act="dupUnit">⧉ Duplikat unit</button>` : ''}
+    <button class="btn" data-act="resetUnit">↺ Kosongkan isian</button>
+    ${sys.units.length > 1 ? `<button class="btn dan" data-act="delUnit">Hapus unit</button>` : ''}
+  </div>
+  <label class="sw"><input type="checkbox" data-vital="1" ${sys.vital ? 'checked' : ''}> <span>Tandai <b>${esc(sys.nama)}</b> sebagai komponen vital <span class="star">★</span></span></label>
+  <div class="bottom"><div class="btns"><button class="btn pri" data-act="nav" data-h="/kapal/${id}">✓ Selesai</button></div></div>`;
+  const refresh = (pid) => {
+    const p = u.params.find(x => x.id === pid);
+    if (p){ const r = $('#r-' + pid); if (r) r.innerHTML = resHTML(p, ctx); }
+    const cc = calcUnit(u, ctx); const ub = $('#ubar'); ub.className = 'ubar ' + cls(cc.v); ub.innerHTML = ubarHTML(cc);
+    const bi = $('#binfo'); if (bi) bi.innerHTML = bobotInfo(u);
+    touch(ship);
+  };
+  ctxUnit = {ship, sys, u, refresh};
+  return {title: u.nama, sub: sys.nama, back:`/kapal/${id}`, html,
+    onInput(e){
+      const el = e.target;
+      if (el.dataset.un){ u.nama = el.value; $('.top h1').firstChild.textContent = el.value || '—'; touch(ship); return; }
+      const pid = el.dataset.p; if (!pid) return;
+      const p = u.params.find(x => x.id === pid); if (!p) return;
+      if (el.dataset.s != null) p.subs[+el.dataset.s][el.dataset.k] = el.value; else p[el.dataset.k] = el.value;
+      refresh(pid);
+    },
+    onChange(e){
+      const el = e.target;
+      if (el.dataset.vital){ sys.vital = el.checked; touch(ship); return; }
+      if (el.type === 'radio' || el.type === 'date'){ const p = u.params.find(x => x.id === el.dataset.p); if (p){ p.now = el.value; refresh(p.id); } }
+    }};
+}
+let ctxUnit = null;
+ACT.neg = el => { const {u, refresh} = ctxUnit; const p = u.params.find(x => x.id === el.dataset.p); const k = el.dataset.k; const v = String(p[k] || '').trim();
+  p[k] = v.startsWith('-') ? v.slice(1) : '-' + v; const inp = $(`input[data-p="${p.id}"][data-k="${k}"]`); inp.value = p[k]; inp.focus(); refresh(p.id); };
+ACT.qv = el => { const {u, refresh} = ctxUnit; const p = u.params.find(x => x.id === el.dataset.p); p.now = el.dataset.v; $(`input[data-p="${p.id}"][data-k="now"]`).value = p.now; refresh(p.id); };
+ACT.clr = el => { const {u, refresh} = ctxUnit; const p = u.params.find(x => x.id === el.dataset.p); p.now = ''; $$(`input[name="sk-${p.id}"]`).forEach(r => r.checked = false); refresh(p.id); };
+ACT.dupUnit = () => { const {ship, sys, u} = ctxUnit; const c = clone(u); c.id = uid(); c.params.forEach(p => { p.id = uid(); p.now = ''; if (p.subs) p.subs.forEach(s => s.now = ''); });
+  c.nama = (TPLK[sys.k]?.unit || 'Unit') + ' ' + (sys.units.length + 1); sys.units.push(c); touch(ship); go(`/kapal/${ship.id}/unit/${sys.id}/${c.id}`); toast('Unit diduplikat (nilai standar ikut tersalin)'); };
+ACT.resetUnit = () => { const {ship, sys, u} = ctxUnit; if (!confirm('Kosongkan semua nilai "saat ini" di unit ini? Nilai standar tetap.')) return;
+  u.params.forEach(p => { p.now = ''; if (p.subs) p.subs.forEach(s => s.now = ''); }); touch(ship); render(); };
+ACT.delUnit = () => { const {ship, sys, u} = ctxUnit; if (!confirm(`Hapus unit "${u.nama}"?`)) return; sys.units = sys.units.filter(x => x.id !== u.id); touch(ship); go(`/kapal/${ship.id}`); };
+const ADD_TYPES = [['naik','Perbandingan — makin besar makin baik'],['turun','Perbandingan — makin kecil makin baik'],['suhu','Suhu'],['deviasi','Keakuratan (deviasi ÷ referensi)'],['skala:display','Skala — Display'],['skala:panel','Skala — Control panel'],['skala:sinyal','Skala — Kualitas sinyal'],['persen','Penilaian fungsi langsung (%)']];
+ACT.addParam = () => {
+  const {sys} = ctxUnit; const t = TPLK[sys.k] || {}; const d = t.addP || {};
+  modal(`<h2>Tambah parameter</h2>
+    <label class="f"><span>Nama parameter</span><input class="t" id="np-l" value="${esc(d.l || '')}" placeholder="mis. Tekanan oli pelumas"></label>
+    <label class="f"><span>Cara penilaian</span><select class="t" id="np-t">${ADD_TYPES.map(([k, l]) => `<option value="${k}" ${k === (d.t || 'naik') ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+    <label class="f"><span>Satuan (opsional)</span><input class="t" id="np-u" value="${esc(d.u || '')}" placeholder="mis. bar, °C, A"></label>
+    <div class="btns"><button class="btn" data-act="closeModal">Batal</button><button class="btn pri" data-act="addParamOk">Tambah</button></div>`);
+};
+ACT.addParamOk = () => {
+  const {ship, sys, u} = ctxUnit; const l = $('#np-l').value.trim(); if (!l){ toast('Nama parameter wajib diisi'); return; }
+  const [tt, sk] = $('#np-t').value.split(':'); const t = TPLK[sys.k] || {}; const d = t.addP || {};
+  const p = mkParam({l, t:tt, u:$('#np-u').value.trim(), sk, ls: tt === d.t ? d.ls : undefined, ln: tt === d.t ? d.ln : undefined, b: u.mode === 'bobot' ? 0 : undefined});
+  u.params.push(p); touch(ship); closeModal(); render(); setTimeout(() => { const el = $('#pr-' + p.id); if (el) el.scrollIntoView({behavior:'smooth', block:'center'}); }, 50);
+};
+ACT.editParam = el => {
+  const {u} = ctxUnit; const p = u.params.find(x => x.id === el.dataset.p);
+  const lab = ['naik','turun','suhu','deviasi','toleransi','efektivitas'].includes(p.t);
+  const [ls, ln] = LBL[p.t] || ['', ''];
+  modal(`<h2>Ubah parameter</h2>
+    <input type="hidden" id="ep-id" value="${p.id}">
+    <label class="f"><span>Nama parameter</span><input class="t" id="ep-l" value="${esc(p.l)}"></label>
+    ${p.t !== 'skala' && p.t !== 'kadaluwarsa' ? `<label class="f"><span>Satuan</span><input class="t" id="ep-u" value="${esc(p.u)}"></label>` : ''}
+    ${lab ? `<div class="pair"><label class="f"><span>Label kolom standar</span><input class="t" id="ep-ls" value="${esc(p.ls || ls)}"></label><label class="f"><span>Label kolom saat ini</span><input class="t" id="ep-ln" value="${esc(p.ln || ln)}"></label></div>` : ''}
+    <p class="small muted">Cara penilaian: ${esc(TIPE[p.t])}</p>
+    <div class="btns"><button class="btn dan" data-act="delParam">Hapus parameter</button><button class="btn pri" data-act="editParamOk">Simpan</button></div>`);
+};
+ACT.editParamOk = () => {
+  const {ship, u} = ctxUnit; const p = u.params.find(x => x.id === $('#ep-id').value);
+  p.l = $('#ep-l').value.trim() || p.l; if ($('#ep-u')) p.u = $('#ep-u').value.trim();
+  if ($('#ep-ls')){ p.ls = $('#ep-ls').value.trim(); p.ln = $('#ep-ln').value.trim(); }
+  touch(ship); closeModal(); render();
+};
+ACT.delParam = () => {
+  const {ship, u} = ctxUnit; const id = $('#ep-id').value; const p = u.params.find(x => x.id === id);
+  if (!confirm(`Hapus parameter "${p.l}" dari unit ini? (Gunakan bila peralatan memang tidak ada di kapal.)`)) return;
+  u.params = u.params.filter(x => x.id !== id); touch(ship); closeModal(); render();
+};
+ACT.closeModal = () => closeModal();
+
+/* =====================================================================
+   VIEW: LAPORAN (siap cetak / PDF / CSV)
+   ===================================================================== */
+function reportBody(ship, detail){
+  const r = calcShip(ship), st = finalStatus(ship, r), ctx = r.ctx;
+  const rows = g => {
+    const G = r[g]; if (!G.n) return '';
+    let h = `<tr class="grp"><td colspan="2">${GN[g].toUpperCase()}</td><td class="n">${pct(G.v)}</td></tr>`;
+    for (const x of G.systems){
+      h += `<tr class="sy"><td colspan="2">${x.sys.vital ? '★ ' : ''}${esc(x.sys.nama)}</td><td class="n">${pct(x.v)}</td></tr>`;
+      for (const u of x.units){
+        h += `<tr><td style="padding-left:16px" colspan="2">${esc(u.unit.nama)}${u.filled < u.total ? ` <span class="muted">(${u.filled}/${u.total})</span>` : ''}</td><td class="n">${pct(u.v)}</td></tr>`;
+        if (detail) for (const p of u.unit.params){
+          const v = calcParam(p, ctx);
+          if (u.unit.mode === 'bobot' && num(p.std) === 0) continue;
+          h += `<tr class="small"><td style="padding-left:28px">${esc(p.l)}${u.unit.mode === 'bobot' ? ` <span class="muted">(bobot ${fnum(p.b)}%)</span>` : ''}</td><td>${v == null ? '<span class="muted">belum diisi</span>' : esc(formula(p, ctx))}</td><td class="n">${pct(v)}</td></tr>`;
+        }
+      }
+    }
+    return h;
+  };
+  const ttd = ship.ttd || {};
+  return `<div class="rep">
+    <div class="kop"><b>REKAPITULASI NILAI KONDISI TEKNIS (KONIS)</b><b>${esc(ship.nama)}${ship.lambung ? ' (' + esc(ship.lambung) + ')' : ''}</b>
+      <span class="small">Periode ${fPeriode(ship.periode)} · Tanggal penilaian ${fTgl(ship.tgl)}</span></div>
+    <table style="margin-bottom:10px"><tr><th style="width:38%">Kelas</th><td>${esc(ship.kelas || '–')}</td></tr>
+      <tr><th>Jenis / fungsi kapal</th><td>Kapal ${ship.jenis === 'tempur' ? 'Tempur' : 'Bantu'}</td></tr>
+      <tr><th>Kotama/Satker</th><td>${esc(ship.satker || '–')}</td></tr>
+      <tr><th>Bobot Platform : Sewaco/Kom</th><td>${fmt(r.bP, 0)}% : ${fmt(r.bS, 0)}%</td></tr></table>
+    <div class="tscroll"><table><thead><tr><th colspan="2">Pesawat / Parameter</th><th style="width:72px">Konis</th></tr></thead><tbody>${rows('P')}${rows('S')}</tbody></table></div>
+    <table style="margin-top:10px">
+      <tr><th style="width:58%">Konis Platform (P)</th><td class="n">${pct(r.P.v)}</td></tr>
+      <tr><th>Konis Sewaco/Komunikasi (S)</th><td class="n">${pct(r.S.v)}</td></tr>
+      <tr><th>Konis Total = (${fmt(r.bP, 0)}% × P) + (${fmt(r.bS, 0)}% × S)</th><td class="n"><b>${pct(r.T)}</b></td></tr>
+      <tr><th>Klasifikasi hasil hitung</th><td>${r.T == null ? '–' : (() => { const s = status(r.T); return `${s.nama} (${s.k}) · ${s.siap} · ${s.laik}`; })()}</td></tr>
+      ${st && st.override ? `<tr><th>Penetapan sesuai kebijakan Kotama</th><td class="c-rb"><b>Rusak Berat (RB) · Tidak Siap · Tidak Laik</b>${ship.rb.alasan ? '<br>' + esc(ship.rb.alasan) : ''}</td></tr>` : ''}
+      <tr><th>Kelengkapan data</th><td>${r.filled} dari ${r.total} parameter</td></tr>
+    </table>
+    ${r.vital.length ? `<p class="small"><b>Komponen vital &lt; 60%:</b> ${r.vital.map(v => esc(v.nama) + ' ' + pct(v.v)).join('; ')}</p>` : ''}
+    ${ship.catatan ? `<p class="small"><b>Catatan:</b> ${esc(ship.catatan)}</p>` : ''}
+    <p class="small muted">Dasar: Surat Edaran Aslog Kasal tentang Tata Cara Pemberian Nilai Persentase Konis KRI (2026). Rentang: 86–100% Baik; 60–85% Rusak Ringan; 0–59% Rusak Berat.</p>
+    <div class="ttd"><div>Mengetahui,<br>${esc(ttd.mJabatan || 'Komandan')}<div class="sp"></div><b>${esc(ttd.mNama || '')}</b><br>${esc(ttd.mPangkat || '')}</div>
+      <div>${esc(ttd.kota || '')}${ttd.kota ? ', ' : ''}${fTgl(ship.tgl)}<br>${esc(ttd.jabatan || 'Penilai')}<div class="sp"></div><b>${esc(ttd.nama || '')}</b><br>${esc(ttd.pangkat || '')}</div></div>
+  </div>`;
+}
+function vReport(id, snap){
+  const ship = snap ? snap.ship : getShip(id); if (!ship) return vNotFound();
+  const r = calcShip(ship), ro = !!snap;
+  ship.ttd = ship.ttd || {}; ship.rb = ship.rb || {on:false, alasan:''};
+  const t = ship.ttd;
+  const form = ro ? `<div class="info noprint" style="margin-bottom:12px">Laporan tersimpan dari riwayat (${fPeriode(ship.periode)}), disimpan ${new Date(snap.savedAt).toLocaleString('id-ID')}. Hanya-baca.</div>` : `
+  <div class="card noprint">
+    <h2>Penetapan status</h2>
+    ${r.vital.length ? `<div class="warn" style="margin:0 0 8px">Ada komponen vital di bawah 60%: ${r.vital.map(v => esc(v.nama)).join(', ')}.</div>` : '<p class="small muted" style="margin-top:0">Tidak ada komponen vital di bawah 60%.</p>'}
+    <label class="sw"><input type="checkbox" data-rb="on" ${ship.rb.on ? 'checked' : ''}><span>Tetapkan <b>Rusak Berat (RB)</b> sesuai kebijakan Kotama</span></label>
+    ${ship.rb.on ? `<label class="f"><span>Dasar penetapan</span><input class="t" data-rb="alasan" value="${esc(ship.rb.alasan)}" placeholder="mis. MPK 2 rusak berat, menunggu overhaul"></label>` : ''}
+  </div>
+  <div class="card noprint">
+    <h2>Penandatangan</h2>
+    <div class="pair"><label class="f"><span>Nama penilai</span><input class="t" data-tt="nama" value="${esc(t.nama || '')}" autocomplete="off"></label>
+    <label class="f"><span>Pangkat/Korps/NRP</span><input class="t" data-tt="pangkat" value="${esc(t.pangkat || '')}" autocomplete="off"></label></div>
+    <div class="pair"><label class="f"><span>Jabatan penilai</span><input class="t" data-tt="jabatan" value="${esc(t.jabatan || '')}" placeholder="mis. Kadep Mesin" autocomplete="off"></label>
+    <label class="f"><span>Tempat</span><input class="t" data-tt="kota" value="${esc(t.kota || '')}" autocomplete="off"></label></div>
+    <div class="pair"><label class="f"><span>Nama yang mengetahui</span><input class="t" data-tt="mNama" value="${esc(t.mNama || '')}" autocomplete="off"></label>
+    <label class="f"><span>Pangkat/Korps/NRP</span><input class="t" data-tt="mPangkat" value="${esc(t.mPangkat || '')}" autocomplete="off"></label></div>
+    <label class="f"><span>Jabatan yang mengetahui</span><input class="t" data-tt="mJabatan" value="${esc(t.mJabatan || '')}" placeholder="Komandan ${esc(ship.nama)}" autocomplete="off"></label>
+    <label class="f"><span>Catatan (opsional)</span><textarea class="t" data-cat="1">${esc(ship.catatan || '')}</textarea></label>
+  </div>`;
+  const detail = !!ui.detail;
+  const html = `${form}
+  <label class="sw noprint"><input type="checkbox" data-detail="1" ${detail ? 'checked' : ''}><span>Tampilkan rincian parameter dan rumus</span></label>
+  <div class="card" id="repbody">${reportBody(ship, detail)}</div>
+  <div class="bottom"><div class="btns">
+    <button class="btn" data-act="csv">⬇ CSV</button>
+    <button class="btn" data-act="print">🖨 Cetak/PDF</button>
+    ${ro ? '' : `<button class="btn pri" data-act="snap">💾 Simpan</button>`}
+  </div></div>`;
+  ctxReport = {ship, snap};
+  const rerender = () => { $('#repbody').innerHTML = reportBody(ship, !!ui.detail); };
+  return {title:'Laporan Konis', sub: ship.nama, back: ro ? `/kapal/${snap.shipId}/riwayat` : `/kapal/${id}`, html,
+    onInput(e){ const el = e.target; if (ro) return;
+      if (el.dataset.tt){ ship.ttd[el.dataset.tt] = el.value; touch(ship); rerender(); }
+      if (el.dataset.cat){ ship.catatan = el.value; touch(ship); rerender(); }
+      if (el.dataset.rb === 'alasan'){ ship.rb.alasan = el.value; touch(ship); rerender(); } },
+    onChange(e){ const el = e.target;
+      if (el.dataset.detail){ ui.detail = el.checked; rerender(); }
+      if (!ro && el.dataset.rb === 'on'){ ship.rb.on = el.checked; touch(ship); render(); } }};
+}
+let ctxReport = null;
+ACT.print = () => { window.print(); };
+ACT.csv = () => {
+  const {ship} = ctxReport; const r = calcShip(ship), st = finalStatus(ship, r), ctx = r.ctx;
+  const q = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+  const n = v => v == null ? '' : v.toFixed(2).replace('.', ',');
+  const L = [['KRI', ship.nama], ['Nomor lambung', ship.lambung], ['Kelas', ship.kelas], ['Jenis', ship.jenis === 'tempur' ? 'Kapal Tempur' : 'Kapal Bantu'], ['Periode', fPeriode(ship.periode)], ['Tanggal penilaian', ship.tgl], [], ['Kelompok', 'Pesawat', 'Unit', 'Parameter', 'Standar', 'Saat ini', 'Satuan', 'Bobot', 'Nilai (%)', 'Nilai unit (%)', 'Nilai pesawat (%)']];
+  for (const g of ['P', 'S']) for (const x of r[g].systems) for (const u of x.units) for (const p of u.unit.params){
+    let std = p.std, now = p.now;
+    if (p.t === 'gabungan') { std = p.subs.map(s => s.std).join(' / '); now = p.subs.map(s => s.now).join(' / '); }
+    L.push([GN[g], x.sys.nama, u.unit.nama, p.l, std, now, p.u, p.b ?? '', n(calcParam(p, ctx)), n(u.v), n(x.v)]);
+  }
+  L.push([], ['Konis Platform', n(r.P.v)], ['Konis Sewaco/Komunikasi', n(r.S.v)], ['Bobot P : S', `${r.bP} : ${r.bS}`], ['Konis Total', n(r.T)], ['Status', st ? `${st.nama} (${st.k}) - ${st.siap} - ${st.laik}${st.override ? ' [ditetapkan]' : ''}` : 'Belum lengkap']);
+  download(`Konis_${safeName(ship.nama)}_${ship.periode || ''}.csv`, '﻿' + L.map(r => r.map(q).join(';')).join('\r\n'), 'text/csv;charset=utf-8');
+};
+ACT.snap = () => {
+  const {ship} = ctxReport; const r = calcShip(ship);
+  if (r.T == null){ toast('Konis Total belum dapat dihitung'); return; }
+  const dup = state.history.find(h => h.shipId === ship.id && h.ship.periode === ship.periode);
+  if (dup && !confirm(`Sudah ada riwayat periode ${fPeriode(ship.periode)}. Ganti dengan data sekarang?`)) return;
+  if (!dup && r.filled < r.total && !confirm(`Baru ${r.filled} dari ${r.total} parameter terisi. Tetap simpan ke riwayat?`)) return;
+  if (dup) state.history = state.history.filter(h => h !== dup);
+  const st = finalStatus(ship, r);
+  state.history.push({id:uid(), shipId:ship.id, savedAt:Date.now(), ship:clone(ship), T:r.T, P:r.P.v, S:r.S.v, st:st.k, override:!!st.override});
+  save(); toast(`Tersimpan ke riwayat (${fPeriode(ship.periode)})`);
+};
+
+/* =====================================================================
+   VIEW: RIWAYAT
+   ===================================================================== */
+function vHistory(id){
+  const ship = getShip(id); if (!ship) return vNotFound();
+  const list = state.history.filter(h => h.shipId === id).sort((a, b) => (a.ship.periode || '').localeCompare(b.ship.periode || ''));
+  let chart = '';
+  if (list.length >= 2){
+    const W = 320, H = 130, pl = 30, pr = 8, pt = 8, pb = 20;
+    const x = i => pl + (W - pl - pr) * (i / (list.length - 1)), y = v => pt + (H - pt - pb) * (1 - v / 100);
+    const pts = list.map((h, i) => `${x(i).toFixed(1)},${y(h.T).toFixed(1)}`).join(' ');
+    chart = `<div class="card"><h2>Tren Konis Total</h2><svg viewBox="0 0 ${W} ${H}" class="trend" role="img" aria-label="Grafik tren Konis Total">
+      <rect x="${pl}" y="${y(100)}" width="${W - pl - pr}" height="${y(86) - y(100)}" fill="#e3f4ea"/><rect x="${pl}" y="${y(86)}" width="${W - pl - pr}" height="${y(60) - y(86)}" fill="#fff1d6"/><rect x="${pl}" y="${y(60)}" width="${W - pl - pr}" height="${y(0) - y(60)}" fill="#fde5e2"/>
+      ${[0, 60, 86, 100].map(v => `<text x="${pl - 4}" y="${y(v) + 4}" font-size="10" text-anchor="end" fill="#5c677d">${v}</text>`).join('')}
+      <polyline points="${pts}" fill="none" stroke="#1f5fbf" stroke-width="2.5"/>
+      ${list.map((h, i) => `<circle cx="${x(i)}" cy="${y(h.T)}" r="4" fill="#1f5fbf"/>`).join('')}
+      <text x="${pl}" y="${H - 4}" font-size="10" fill="#5c677d">${esc(fPeriode(list[0].ship.periode))}</text><text x="${W - pr}" y="${H - 4}" font-size="10" text-anchor="end" fill="#5c677d">${esc(fPeriode(list[list.length - 1].ship.periode))}</text></svg></div>`;
+  }
+  const rows = list.slice().reverse().map(h => { const st = ST[h.st];
+    return `<div class="card"><div class="row"><div class="grow"><b>${fPeriode(h.ship.periode)}</b><div class="small muted">P ${pct(h.P, 1)} · S ${pct(h.S, 1)} · disimpan ${new Date(h.savedAt).toLocaleDateString('id-ID')}</div>
+      <div style="margin-top:4px">${statusPill(st)}${h.override ? ' <span class="small c-rb">(ditetapkan)</span>' : ''}</div></div><div class="big c-${st.cls}" style="font-size:22px;font-weight:750">${fmt(h.T, 1)}%</div></div>
+      <div class="btns" style="margin-top:10px"><button class="btn" data-act="nav" data-h="/riwayat/${h.id}">Lihat laporan</button><button class="btn" data-act="restore" data-id="${h.id}">Salin ke data aktif</button><button class="btn dan" data-act="delHist" data-id="${h.id}" aria-label="Hapus">🗑</button></div></div>`; }).join('');
+  const html = (list.length ? chart + rows : `<div class="card empty"><div class="ico">🕘</div><p class="muted">Belum ada riwayat. Buka <b>Laporan</b> lalu tekan <b>Simpan</b> untuk menyimpan penilaian periode ini.</p></div>`);
+  return {title:'Riwayat Penilaian', sub: ship.nama, back:`/kapal/${id}`, html};
+}
+ACT.delHist = el => { if (!confirm('Hapus riwayat ini?')) return; state.history = state.history.filter(h => h.id !== el.dataset.id); save(); render(); };
+ACT.restore = el => {
+  const h = state.history.find(x => x.id === el.dataset.id); const ship = getShip(h.shipId);
+  if (!confirm(`Ganti seluruh isian aktif ${ship.nama} dengan data periode ${fPeriode(h.ship.periode)}? Isian aktif saat ini akan tertimpa.`)) return;
+  const c = clone(h.ship); c.id = ship.id; c.periode = thisMonth(); c.tgl = today();
+  Object.assign(ship, c); touch(ship); go(`/kapal/${ship.id}`); toast('Data disalin. Perbarui nilai yang berubah.');
+};
+
+/* =====================================================================
+   VIEW: PENGATURAN
+   ===================================================================== */
+function vSettings(){
+  const pinOn = !!sess.key;
+  const html = `
+  <div class="card"><h2>🔒 Kunci PIN</h2>
+    <p class="small muted" style="margin-top:0">${pinOn ? 'PIN aktif. Data di perangkat ini tersimpan <b>terenkripsi (AES-256)</b> dan aplikasi terkunci otomatis setelah 5 menit tidak dibuka.' : 'Tanpa PIN, data tersimpan apa adanya di penyimpanan browser perangkat ini. Aktifkan PIN agar data terenkripsi.'}</p>
+    ${hasCrypto() ? (pinOn ? `<div class="btns"><button class="btn" data-act="setPin">Ganti PIN</button><button class="btn" data-act="lock">Kunci sekarang</button><button class="btn dan" data-act="rmPin">Matikan PIN</button></div>` : `<button class="btn pri block" data-act="setPin">Aktifkan PIN</button>`) : '<div class="note">Enkripsi tidak tersedia di browser ini (butuh HTTPS atau localhost).</div>'}
+    <p class="small muted">PIN yang lupa tidak dapat dipulihkan. Buat cadangan berkala.</p></div>
+  <div class="card"><h2>💾 Cadangan data</h2>
+    <p class="small muted" style="margin-top:0">Simpan file cadangan untuk pindah HP atau berbagi ke perwira lain. File cadangan <b>tidak terenkripsi</b>; simpan di tempat aman.</p>
+    <div class="btns"><button class="btn" data-act="backup">⬇ Ekspor cadangan</button><label class="btn">⬆ Impor cadangan<input type="file" accept="application/json,.json" data-imp="1" hidden></label></div></div>
+  <div class="card"><h2>📘 Tentang</h2>
+    <p class="small" style="margin-top:0">KONIS KRI v${APP_VER}. Rumus mengikuti Surat Edaran Aslog Kasal tentang Tata Cara Pemberian Nilai Persentase Kondisi Teknis KRI (Juni 2026) beserta lampirannya.</p>
+    <table class="small" style="width:100%;border-collapse:collapse">
+      <tr><td><span class="pill b">86–100%</span></td><td>Baik · Siap Tempur · Laik Tempur</td></tr>
+      <tr><td><span class="pill rr">60–85%</span></td><td>Rusak Ringan · Siap Operasi · Laik Operasi</td></tr>
+      <tr><td><span class="pill rb">0–59%</span></td><td>Rusak Berat · Tidak Siap · Tidak Laik</td></tr></table>
+    <ul class="small muted" style="padding-left:18px">
+      <li>Nilai pesawat = rata-rata unitnya; Konis Platform/Sewaco = rata-rata nilai pesawat.</li>
+      <li>Konis Total = (bobot P × Konis Platform) + (bobot S × Konis Sewaco/Komunikasi).</li>
+      <li>Nilai tiap parameter dibatasi 0–100%.</li>
+      <li>Status dihitung dari nilai yang dibulatkan 2 desimal (mis. 85,99% = Rusak Ringan).</li>
+      <li>Aplikasi tidak membuat koneksi internet apa pun.</li></ul></div>
+  <div class="card"><h2>Hapus semua data</h2><button class="btn dan block" data-act="wipe">Hapus semua data di perangkat ini</button></div>`;
+  return {title:'Pengaturan', back:'/', html,
+    onChange(e){ if (e.target.dataset.imp) importFile(e.target.files[0]); }};
+}
+function pinModal(title){
+  modal(`<h2>${title}</h2>
+    <label class="f"><span>PIN baru (4–8 angka)</span><input class="t" id="pin1" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="new-password"></label>
+    <label class="f"><span>Ulangi PIN</span><input class="t" id="pin2" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="new-password"></label>
+    <div class="btns"><button class="btn" data-act="closeModal">Batal</button><button class="btn pri" data-act="setPinOk">Simpan PIN</button></div>`);
+}
+ACT.setPin = () => pinModal(sess.key ? 'Ganti PIN' : 'Aktifkan PIN');
+ACT.setPinOk = async () => {
+  const a = $('#pin1').value, b = $('#pin2').value;
+  if (!/^\d{4,8}$/.test(a)){ toast('PIN harus 4–8 angka'); return; }
+  if (a !== b){ toast('PIN tidak sama'); return; }
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  sess.key = await deriveKey(a, salt); sess.salt = salt; await persist(); closeModal(); render(); toast('PIN aktif. Data terenkripsi.');
+};
+ACT.rmPin = async () => { if (!confirm('Matikan PIN? Data akan disimpan tanpa enkripsi.')) return; sess.key = null; sess.salt = null; await persist(); render(); toast('PIN dimatikan'); };
+ACT.lock = () => lockNow();
+ACT.backup = () => {
+  if (!confirm('File cadangan berisi seluruh data dan TIDAK terenkripsi. Lanjutkan?')) return;
+  download(`cadangan_konis_kri_${today()}.json`, JSON.stringify({app:'konis-kri', ver:APP_VER, exported:new Date().toISOString(), data:state}, null, 1), 'application/json');
+};
+function importFile(f){
+  if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    try {
+      const o = JSON.parse(rd.result); const d = o.data || o;
+      if (!Array.isArray(d.ships)) throw new Error('format tidak dikenali');
+      const ids = new Set(state.ships.map(s => s.id)); const same = d.ships.filter(s => ids.has(s.id)).length;
+      if (!confirm(`Impor ${d.ships.length} kapal dan ${(d.history || []).length} riwayat?${same ? `\n${same} kapal dengan data yang sama akan ditimpa.` : ''}`)) return;
+      const imp = new Set(d.ships.map(s => s.id));
+      state.ships = state.ships.filter(s => !imp.has(s.id)).concat(d.ships);
+      const hids = new Set((d.history || []).map(h => h.id));
+      state.history = state.history.filter(h => !hids.has(h.id)).concat(d.history || []);
+      save(); toast('Impor berhasil'); go('/');
+    } catch (e){ alert('Gagal impor: ' + e.message); }
+  };
+  rd.readAsText(f);
+}
+ACT.wipe = () => {
+  if (!confirm('Hapus SEMUA kapal, riwayat dan PIN di perangkat ini?')) return;
+  if (!confirm('Yakin? Data tidak dapat dikembalikan.')) return;
+  localStorage.removeItem(KEY); sess.key = null; sess.salt = null; sess.locked = false; state = {v:1, ships:[], history:[]}; go('/'); toast('Semua data dihapus');
+};
+
+/* =====================================================================
+   VIEW: KUNCI
+   ===================================================================== */
+function renderLock(){
+  $('#root').innerHTML = `<div class="lock"><div style="font-size:48px">⚓</div><h1 style="margin:8px 0 4px">KONIS KRI</h1><p style="opacity:.8;margin:0 0 18px">Masukkan PIN untuk membuka data</p>
+    <form id="lockf" style="display:flex;flex-direction:column;align-items:center;gap:12px;width:100%">
+      <input class="t" id="pinIn" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="current-password" aria-label="PIN">
+      <button class="btn pri" style="min-width:200px" type="submit">Buka</button>
+      <div id="lockMsg" style="min-height:22px;color:#ffd0c9"></div></form>
+    <button class="btn" style="margin-top:24px;background:transparent;color:#fff;border-color:rgba(255,255,255,.3)" data-act="forgot">Lupa PIN?</button></div>`;
+  setTimeout(() => $('#pinIn').focus(), 50);
+  $('#lockf').addEventListener('submit', async e => {
+    e.preventDefault();
+    const msg = $('#lockMsg');
+    if (Date.now() < sess.waitUntil){ msg.textContent = `Tunggu ${Math.ceil((sess.waitUntil - Date.now()) / 1000)} detik.`; return; }
+    msg.textContent = 'Membuka…';
+    try { await unlock($('#pinIn').value); render(); }
+    catch (err){ sess.fails++; $('#pinIn').value = '';
+      if (sess.fails >= 5){ sess.waitUntil = Date.now() + 30000; sess.fails = 0; msg.textContent = 'PIN salah 5 kali. Tunggu 30 detik.'; }
+      else msg.textContent = 'PIN salah.'; }
+  });
+}
+ACT.forgot = () => {
+  if (!confirm('PIN tidak dapat dipulihkan karena data terenkripsi.\n\nHapus semua data di perangkat ini dan mulai dari awal? (Bisa dipulihkan dari file cadangan bila ada.)')) return;
+  if (!confirm('Yakin menghapus semua data?')) return;
+  localStorage.removeItem(KEY); sess.locked = false; sess.blob = null; state = {v:1, ships:[], history:[]}; location.hash = '/'; render();
+};
+
+/* =====================================================================
+   ROUTER & RENDER
+   ===================================================================== */
+function vNotFound(){ return {title:'Tidak ditemukan', back:'/', html:'<div class="card">Data tidak ditemukan. <a href="#/">Kembali ke beranda</a></div>'}; }
+const currentRoute = () => (location.hash.slice(1) || '/').split('/').filter(Boolean);
+let view = null, lastRoute = '';
+function render(){
+  if (sess.locked){ renderLock(); return; }
+  const r = currentRoute(), key = r.join('/');
+  if (r[0] !== 'kapal' || (r[1] !== 'baru' && r[2] !== 'edit')) draft = null;
+  if (r[0] === 'kapal' && r[1] === 'baru') view = vShipForm(null);
+  else if (r[0] === 'kapal' && r[2] === 'edit') view = vShipForm(r[1]);
+  else if (r[0] === 'kapal' && r[2] === 'unit') view = vUnit(r[1], r[3], r[4]);
+  else if (r[0] === 'kapal' && r[2] === 'laporan') view = vReport(r[1]);
+  else if (r[0] === 'kapal' && r[2] === 'riwayat') view = vHistory(r[1]);
+  else if (r[0] === 'kapal' && r[1]) view = vShip(r[1]);
+  else if (r[0] === 'riwayat' && r[1]){ const h = state.history.find(x => x.id === r[1]); view = h ? vReport(h.shipId, h) : vNotFound(); }
+  else if (r[0] === 'pengaturan') view = vSettings();
+  else view = vHome();
+  const y = key === lastRoute ? window.scrollY : 0;
+  $('#root').innerHTML = `<header class="top">${view.back != null ? `<button class="ib" data-act="nav" data-h="${view.back}" aria-label="Kembali">‹</button>` : '<span style="width:8px"></span>'}
+    <h1>${esc(view.title)}${view.sub ? `<small>${esc(view.sub)}</small>` : ''}</h1>${view.right || ''}</header><main>${view.html}</main>`;
+  window.scrollTo(0, y); lastRoute = key;
+}
+ACT.nav = el => go(el.dataset.h);
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  const f = ACT[el.dataset.act]; if (f){ e.preventDefault(); f(el); }
+});
+document.addEventListener('input', e => { if (view && view.onInput && !sess.locked) view.onInput(e); });
+document.addEventListener('change', e => { if (view && view.onChange && !sess.locked) view.onChange(e); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.matches('.inw input')){ e.preventDefault();
+    const all = $$('.inw input:not([type=date])'); const i = all.indexOf(e.target); if (all[i + 1]) all[i + 1].focus(); else e.target.blur(); }
+  if (e.key === 'Escape' && !$('#modal').hidden) closeModal();
+});
+window.addEventListener('hashchange', () => { closeModal(); render(); });
+
+/* ---------- mulai ---------- */
+load();
+render();
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')){
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
